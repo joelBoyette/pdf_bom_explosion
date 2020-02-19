@@ -9,9 +9,9 @@ warnings.filterwarnings("ignore")
 from pdf_bom import read_pdf_bom
 
 
-epicor_data = pd.read_excel(r'C:\Users\JBoyette.BRLEE\Documents\Development\pdf_bom_explosion\test_epicor_data.xlsx',
-                            sheet_name='data')
-
+epicor_data = \
+    pd.read_excel(r'C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion\test_epicor_data.xlsx',
+                  sheet_name='data')
 
 # ################ CAMELOT ####################
 # https://camelot-py.readthedocs.io/en/master/user/advanced.html
@@ -149,7 +149,7 @@ bom_explosion_df = traverse_bom('1021045', 5, base_path)
 
 
 # Load and clear old data
-excel_book = r'C:\Users\JBoyette.BRLEE\Documents\Development\pdf_bom_explosion\output.xlsx'
+excel_book = r'C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion\output.xlsx'
 book = load_workbook(excel_book)
 book['Sheet1'].sheet_state = 'visible'
 
