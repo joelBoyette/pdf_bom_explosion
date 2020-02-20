@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dd931606-b969-4101-bc3c-8542ba0c3935" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/traverse_bom.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pdf_bom_explosion.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdf_bom_explosion.py" afterDir="false" />
     </list>
@@ -15,7 +16,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1Y2etoiot1AGsDEbwylroNiDShy" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$USER_HOME$/AppData/Local/Continuum/anaconda3/envs/pdf_bom_explosion/python.exe" />
