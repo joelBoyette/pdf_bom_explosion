@@ -40,7 +40,7 @@ def traverse_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\'):
     df.loc[~df['PART NUMBER'].isin(subassy_df), 'sub'] = 'no'
 
     # put non phantoms in df
-    df_no_phantom = df.loc[(~df['Phantom BOM']) | (df['sub'] == 'no')]
+    df_no_phantom = df.loc[(~df['Phantom BOM']) & (df['sub'] == 'no')]
     df_no_phantom['# Top Level to Make'] = make_qty / traverse_bom.assy_qp
     df_no_phantom['Assembly'] = traverse_bom.part
     df_no_phantom['Assembly Q/P'] = traverse_bom.assy_qp
@@ -90,7 +90,7 @@ traverse_bom.assy_qty = 0
 traverse_bom.assy_qp = 1
 
 # run recursion
-bom_explosion_df = traverse_bom(top_level='1021045', make_qty=5)
+bom_explosion_df = traverse_bom(top_level='1021045', make_qty=1)
 
 # Load xlsx and clear old data
 excel_book = r'C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion\output.xlsx'
