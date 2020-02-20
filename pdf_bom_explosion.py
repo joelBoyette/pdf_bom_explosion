@@ -59,16 +59,13 @@ def traverse_bom(top_level, qty, file_path=r'\\vimage\latest' + '\\'):
 
     if not df_phantoms.empty:
 
-        df_phantom_dict = df_phantoms.to_dict("list")
-        print(df_phantom_dict)
-        for index, phantom in enumerate(df_phantom_dict):
-            print(f'index {index} row {df_phantom_dict["PART NUMBER"]}')
+        for idx, df_row in df_phantoms.iterrows():
+
             traverse_bom.level += 1
 
-            phantom = df_phantom_dict["PART NUMBER"][index]
-            phantom_qty = int(df_phantom_dict["QTY"][index])
+            phantom = df_phantoms.loc[idx, 'PART NUMBER']
+            phantom_qty = int(df_phantoms.loc[idx, 'QTY'])
             phantom_extd_qty = phantom_qty * traverse_bom.assy_qty
-
             traverse_bom.assy_qp = phantom_qty
 
             # recursion through lower levels
@@ -89,7 +86,7 @@ traverse_bom.assy_qty = 0
 traverse_bom.assy_qp = 1
 
 # run recursion
-bom_explosion_df = traverse_bom(top_level='1021045', qty=5)
+bom_explosion_df = traverse_bom(top_level='1021045', qty=1)
 
 # Load xlsx and clear old data
 excel_book = r'C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion\output.xlsx'
@@ -114,11 +111,11 @@ file_path = traverse_bom.passed_args['file_path']
 for i, row in enumerate(part_list):
 
     # sets hyperlink value
-    sheet.cell(row=i+2, column=16).value = \
+    sheet.cell(row=i+2, column=17).value = \
         f'=HYPERLINK("{file_path}{part_list[i]}.pdf","print")'
 
     # sets hyperlink format
-    sheet.cell(row=i+2, column=16).font = Font(underline='single', color='0563C1')
+    sheet.cell(row=i+2, column=17).font = Font(underline='single', color='0563C1')
 
 sheet.freeze_panes = 'A2'
 writer.save()
