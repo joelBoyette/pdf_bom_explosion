@@ -21,15 +21,17 @@ subassy_df = subassy_df.loc[(subassy_df['ResourceGrpID'] != 'FAB')
 subassy_df = subassy_df['MtlPartNum'].unique()
 
 
-def traverse_bom(top_level, qty, file_path=r'\\vimage\latest' + '\\'):
+def traverse_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\'):
 
     traverse_bom.passed_args = locals()
 
     traverse_bom.part = top_level
-    traverse_bom.assy_qty = qty
+    traverse_bom.assy_qty = make_qty
     traverse_bom.sort_path += '\\' + traverse_bom.part
 
-    print(f'traverse bom part {traverse_bom.part} level {traverse_bom.level} path {traverse_bom.sort_path}')
+    print(f'traverse bom part {traverse_bom.part} '
+          f'level {traverse_bom.level} path {traverse_bom.sort_path} '
+          f'assy qty {traverse_bom.assy_qty}')
 
     # Get bom from pdf and merge epicor data
     df = pdf_bom.read_pdf_bom(traverse_bom.part, file_path)
@@ -39,11 +41,12 @@ def traverse_bom(top_level, qty, file_path=r'\\vimage\latest' + '\\'):
 
     # put non phantoms in df
     df_no_phantom = df.loc[(~df['Phantom BOM']) | (df['sub'] == 'no')]
+    df_no_phantom['# Top Level to Make'] = make_qty / traverse_bom.assy_qp
     df_no_phantom['Assembly'] = traverse_bom.part
     df_no_phantom['Assembly Q/P'] = traverse_bom.assy_qp
-    df_no_phantom['Assembly Extd Qty'] = traverse_bom.assy_qty
-    df_no_phantom['Comp Extd Qty'] = df_no_phantom['Assembly Extd Qty'] * df_no_phantom['QTY'].astype(int)
-    df_no_phantom['# Top Level to Make'] = df_no_phantom['Assembly Extd Qty'] / df_no_phantom['Assembly Q/P']
+    df_no_phantom['Assembly Make Qty'] = df_no_phantom['# Top Level to Make'] * df_no_phantom['Assembly Q/P']
+    df_no_phantom['Comp Extd Qty'] = df_no_phantom['Assembly Make Qty'] * df_no_phantom['QTY'].astype(int)
+
     df_no_phantom['Level'] = traverse_bom.level
     df_no_phantom['Sort Path'] = traverse_bom.sort_path
     df_no_phantom['Dwg Link'] = ''
@@ -65,7 +68,7 @@ def traverse_bom(top_level, qty, file_path=r'\\vimage\latest' + '\\'):
 
             phantom = df_phantoms.loc[idx, 'PART NUMBER']
             phantom_qty = int(df_phantoms.loc[idx, 'QTY'])
-            phantom_extd_qty = phantom_qty * traverse_bom.assy_qty
+            phantom_extd_qty = traverse_bom.assy_qty * phantom_qty
             traverse_bom.assy_qp = phantom_qty
 
             # recursion through lower levels
@@ -74,6 +77,7 @@ def traverse_bom(top_level, qty, file_path=r'\\vimage\latest' + '\\'):
             # reset bom level and sort path for next traversal
             traverse_bom.level -= 1
             traverse_bom.sort_path = sort_path_reset
+            traverse_bom.assy_qty = make_qty
 
     return traverse_bom.df_final
 
@@ -86,7 +90,7 @@ traverse_bom.assy_qty = 0
 traverse_bom.assy_qp = 1
 
 # run recursion
-bom_explosion_df = traverse_bom(top_level='1021045', qty=1)
+bom_explosion_df = traverse_bom(top_level='1021045', make_qty=5)
 
 # Load xlsx and clear old data
 excel_book = r'C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion\output.xlsx'
