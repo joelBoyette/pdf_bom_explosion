@@ -8,7 +8,7 @@ from openpyxl.styles import Font
 warnings.filterwarnings("ignore")
 
 # run recursion
-bom_explosion_df = traverse_bom.explode_bom(top_level='1021045', make_qty=1)
+bom_explosion_df = traverse_bom.explode_bom(top_level='1020342', make_qty=1, ignore_epicor=True)
 
 # Load xlsx and clear old data
 excel_book = r'C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion\output.xlsx'

@@ -900,7 +900,7 @@ def read_pdf_bom(part, file_path):
                                             except:
                                                 print(f' no methods worked for {part}')
                                                 pdf_bom_df = pd.DataFrame(
-                                                    columns={'PART NUMBER', 'QTY', 'FUNCTION'})
+                                                    columns=['PART NUMBER', 'QTY', 'FUNCTION'])
 
     # appends current ecn df to the overall df
     pdf_bom_all_df = pdf_bom_all_df.append(pdf_bom_df, sort=False)

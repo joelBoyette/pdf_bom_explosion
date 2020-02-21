@@ -20,7 +20,7 @@ subassy_df = subassy_df.loc[(subassy_df['ResourceGrpID'] != 'FAB')
 subassy_df = subassy_df['MtlPartNum'].unique()
 
 
-def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\'):
+def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\', ignore_epicor=False):
 
     explode_bom.passed_args = locals()
 
@@ -34,49 +34,81 @@ def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\'):
 
     # Get bom from pdf and merge epicor data
     df = pdf_bom.read_pdf_bom(explode_bom.part, file_path)
-    df = df.merge(epicor_data, on='PART NUMBER', how='left')
-    df.loc[df['PART NUMBER'].isin(subassy_df), 'sub'] = 'yes'
-    df.loc[~df['PART NUMBER'].isin(subassy_df), 'sub'] = 'no'
 
-    # put non phantoms in df
-    df_no_phantom = df.loc[(~df['Phantom BOM']) & (df['sub'] == 'no')]
-    df_no_phantom['# Top Level to Make'] = make_qty / explode_bom.assy_qp
-    df_no_phantom['Assembly'] = explode_bom.part
-    df_no_phantom['Assembly Q/P'] = explode_bom.assy_qp
-    df_no_phantom['Assembly Make Qty'] = df_no_phantom['# Top Level to Make'] * df_no_phantom['Assembly Q/P']
-    df_no_phantom['Comp Extd Qty'] = df_no_phantom['Assembly Make Qty'] * df_no_phantom['QTY'].astype(int)
+    if df.empty:
+        pass
+    else:
 
-    df_no_phantom['Level'] = explode_bom.level
-    df_no_phantom['Sort Path'] = explode_bom.sort_path
-    df_no_phantom['Dwg Link'] = ''
+        # use epicor flags to determine which parts to explode
+        if not ignore_epicor:
 
-    # append non phantoms to final list
-    explode_bom.df_final = explode_bom.df_final.append(df_no_phantom)
+            df = df.merge(epicor_data, on='PART NUMBER', how='left')
+            df.loc[df['PART NUMBER'].isin(subassy_df), 'sub'] = 'yes'
+            df.loc[~df['PART NUMBER'].isin(subassy_df), 'sub'] = 'no'
 
-    # capture the sort path before recursion.  used to set the sort path on phantoms
-    sort_path_reset = explode_bom.sort_path
+            # put non phantoms in df
+            df_no_explode = df.loc[(~df['Phantom BOM']) & (df['sub'] == 'no')]
+            df_no_explode['# Top Level to Make'] = make_qty / explode_bom.assy_qp
+            df_no_explode['Assembly'] = explode_bom.part
+            df_no_explode['Assembly Q/P'] = explode_bom.assy_qp
+            df_no_explode['Assembly Make Qty'] = df_no_explode['# Top Level to Make'] * df_no_explode['Assembly Q/P']
+            df_no_explode['Comp Extd Qty'] = df_no_explode['Assembly Make Qty'] * df_no_explode['QTY'].astype(int)
 
-    # check for phantoms and traverse boms
-    df_phantoms = df.loc[(df['Phantom BOM']) | (df['sub'] == 'yes')][['PART NUMBER', 'QTY']]
+            df_no_explode['Level'] = explode_bom.level
+            df_no_explode['Sort Path'] = explode_bom.sort_path
+            df_no_explode['Dwg Link'] = ''
 
-    if not df_phantoms.empty:
+            # append non phantoms to final list
+            explode_bom.df_final = explode_bom.df_final.append(df_no_explode)
 
-        for idx, df_row in df_phantoms.iterrows():
+            # capture the sort path before recursion.  used to set the sort path on phantoms
+            sort_path_reset = explode_bom.sort_path
 
-            explode_bom.level += 1
+            # check for phantoms and traverse boms
+            df_explode = df.loc[(df['Phantom BOM']) | (df['sub'] == 'yes')][['PART NUMBER', 'QTY']]
 
-            phantom = df_phantoms.loc[idx, 'PART NUMBER']
-            phantom_qty = int(df_phantoms.loc[idx, 'QTY'])
-            phantom_extd_qty = explode_bom.assy_qty * phantom_qty
-            explode_bom.assy_qp = phantom_qty
+        else:
 
-            # recursion through lower levels
-            explode_bom(phantom, phantom_extd_qty, file_path)
+            # do not care about epicor flags, keep exploding as long as prints have BOM's
+            df_no_explode = df
 
-            # reset bom level and sort path for next traversal
-            explode_bom.level -= 1
-            explode_bom.sort_path = sort_path_reset
-            explode_bom.assy_qty = make_qty
+            df_no_explode['# Top Level to Make'] = make_qty / explode_bom.assy_qp
+            df_no_explode['Assembly'] = explode_bom.part
+            df_no_explode['Assembly Q/P'] = explode_bom.assy_qp
+            df_no_explode['Assembly Make Qty'] = df_no_explode['# Top Level to Make'] * df_no_explode['Assembly Q/P']
+            df_no_explode['Comp Extd Qty'] = df_no_explode['Assembly Make Qty'] * df_no_explode['QTY'].astype(int)
+
+            df_no_explode['Level'] = explode_bom.level
+            df_no_explode['Sort Path'] = explode_bom.sort_path
+            df_no_explode['Dwg Link'] = ''
+
+            # append non phantoms to final list
+            explode_bom.df_final = explode_bom.df_final.append(df_no_explode)
+
+            # capture the sort path before recursion.  used to set the sort path on phantoms
+            sort_path_reset = explode_bom.sort_path
+
+            # check for phantoms and traverse boms
+            df_explode = df
+
+        if not df_explode.empty:
+
+            for idx, df_row in df_explode.iterrows():
+
+                explode_bom.level += 1
+
+                explode_part = df_explode.loc[idx, 'PART NUMBER']
+                explode_qty = int(df_explode.loc[idx, 'QTY'])
+                explode_extd_qty = explode_bom.assy_qty * explode_qty
+                explode_bom.assy_qp = explode_qty
+
+                # recursion through lower levels
+                explode_bom(explode_part, explode_extd_qty, file_path, ignore_epicor)
+
+                # reset bom level and sort path for next traversal
+                explode_bom.level -= 1
+                explode_bom.sort_path = sort_path_reset
+                explode_bom.assy_qty = make_qty
 
     return explode_bom.df_final
 
