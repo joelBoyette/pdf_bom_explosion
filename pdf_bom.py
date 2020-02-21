@@ -8,20 +8,20 @@ warnings.filterwarnings("ignore")
 
 
 # #################### TABULA PY  ############################
-
 # https://tabula-py.readthedocs.io/en/latest/getting_started.html#example
 def clean_pdf_tabulapy(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
-    pdf_df = tabula.read_pdf(full_path, stream=True)
+    pdf_df = tabula.read_pdf(full_path, stream=True, pages=1)
 
     find_column_dict = {}
     for (column_name, column_data) in pdf_df.iteritems():
-        #     print('Colunm Name : ', columnName)
-        #     print('Column Contents : ', columnData.values)
+        #     print('Column Name : ', column_name)
+        #     print('Column Contents : ', column_data.values)
         for x in column_data.values:
-
-            if 'PART NUMBER' == str(x):
+            if 'ASTM' in str(x):
+                raise Exception
+            elif 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER QTY'}
@@ -31,6 +31,7 @@ def clean_pdf_tabulapy(part, file_path):
                 find_column_dict = {'column': column_name, 'clean type': 'NUMBER'}
 
     clean_type = find_column_dict['clean type']
+
     col_index = pdf_df.columns.get_loc(find_column_dict['column'])
     df_final = pdf_df.iloc[:, col_index:col_index + 3]
     df_final = df_final.dropna(how='all')
@@ -175,7 +176,7 @@ def clean_pdf_tabulapy(part, file_path):
         df_final = df_final.dropna(how='any')
         df_final['FUNCTION'] = 'tabulapy'
 
-    return df_final
+        return df_final
 
     df_final = pd.DataFrame(columns=['PART NUMBER', 'QTY'])
     df_final['clean_type'] = full_path
@@ -184,7 +185,6 @@ def clean_pdf_tabulapy(part, file_path):
 
 
 # ################ CAMELOT ####################
-
 # https://camelot-py.readthedocs.io/en/master/user/advanced.html
 def clean_pdf_camelot_scale15(part, file_path):
 
@@ -197,7 +197,9 @@ def clean_pdf_camelot_scale15(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
-            if 'PART NUMBER' == str(x):
+            if 'ASTM' in str(x):
+                raise Exception
+            elif 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER QTY'}
@@ -207,6 +209,7 @@ def clean_pdf_camelot_scale15(part, file_path):
                 find_column_dict = {'column': column_name, 'clean type': 'NUMBER'}
             elif 'NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'NUMBER QTY'}
+
 
     clean_type = find_column_dict['clean type']
 
@@ -262,7 +265,9 @@ def clean_pdf_camelot_scale10(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
-            if 'PART NUMBER' == str(x):
+            if 'ASTM' in str(x):
+                raise Exception
+            elif 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER QTY'}
@@ -325,7 +330,9 @@ def clean_pdf_camelot_scale5(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
-            if 'PART NUMBER' == str(x):
+            if 'ASTM' in str(x):
+                raise Exception
+            elif 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER QTY'}
@@ -386,7 +393,9 @@ def clean_pdf_camelot_stream(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
-            if 'PART NUMBER' == str(x):
+            if 'ASTM' in str(x):
+                raise Exception
+            elif 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER QTY'}
@@ -448,6 +457,8 @@ def clean_pdf_camelot_scale20(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
+            if 'ASTM' in str(x):
+                raise Exception
             if 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
@@ -509,7 +520,9 @@ def clean_pdf_camelot_scale15_split_text(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
-            if 'PART NUMBER' == str(x):
+            if 'ASTM' in str(x):
+                raise Exception
+            elif 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER QTY'}
@@ -571,6 +584,8 @@ def clean_pdf_camelot_scale10_split_text(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
+            if 'ASTM' in str(x):
+                raise Exception
             if 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
@@ -633,7 +648,9 @@ def clean_pdf_camelot_scale5_split_text(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
-            if 'PART NUMBER' == str(x):
+            if 'ASTM' in str(x):
+                raise Exception
+            elif 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER QTY'}
@@ -693,6 +710,8 @@ def clean_pdf_camelot_scale20_split_text(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
+            if 'ASTM' in str(x):
+                raise Exception
             if 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
@@ -756,7 +775,9 @@ def clean_pdf_camelot_scale3(part, file_path):
     for (column_name, column_data) in pdf_df.iteritems():
 
         for x in column_data.values:
-            if 'PART NUMBER' == str(x):
+            if 'ASTM' in str(x):
+                raise Exception
+            elif 'PART NUMBER' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER'}
             elif 'PART NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'PART NUMBER QTY'}
