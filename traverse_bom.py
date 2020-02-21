@@ -6,10 +6,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-epicor_data = \
-            pd.read_excel(
-                r'C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion\test_epicor_data.xlsx',
-                sheet_name='data')
+epicor_data = pd.read_excel(r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',
+                            sheet_name='epicor_part_data')
 
 subassy_df = pd.read_excel(r'\\Vfile\d\MaterialPlanning\MPPublic\manufactured_part_routings.xlsm')
 
@@ -42,12 +40,16 @@ def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\', ignore
         # use epicor flags to determine which parts to explode
         if not ignore_epicor:
 
-            df = df.merge(epicor_data, on='PART NUMBER', how='left')
+            df = df.merge(epicor_data[['PartNum', 'PartDescription', 'PhantomBOM', 'TypeCode',
+                                       'Cost', 'OH', 'ONO', 'DMD', 'Buyer']],
+                          left_on='PART NUMBER', right_on='PartNum', how='left').fillna(0)
+
+            df = df.drop('PartNum', axis=1)
             df.loc[df['PART NUMBER'].isin(subassy_df), 'sub'] = 'yes'
             df.loc[~df['PART NUMBER'].isin(subassy_df), 'sub'] = 'no'
 
             # put non phantoms in df
-            df_no_explode = df.loc[(~df['Phantom BOM']) & (df['sub'] == 'no')]
+            df_no_explode = df.loc[(~df['PhantomBOM']) & (df['sub'] == 'no')]
             df_no_explode['# Top Level to Make'] = make_qty / explode_bom.assy_qp
             df_no_explode['Assembly'] = explode_bom.part
             df_no_explode['Assembly Q/P'] = explode_bom.assy_qp
@@ -65,7 +67,7 @@ def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\', ignore
             sort_path_reset = explode_bom.sort_path
 
             # check for phantoms and traverse boms
-            df_explode = df.loc[(df['Phantom BOM']) | (df['sub'] == 'yes')][['PART NUMBER', 'QTY']]
+            df_explode = df.loc[(df['PhantomBOM']) | (df['sub'] == 'yes')][['PART NUMBER', 'QTY']]
 
         else:
 

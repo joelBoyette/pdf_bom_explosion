@@ -1,9 +1,8 @@
 import pandas as pd
+import bin_locations
 
-part = 'beef'
+part_df = pd.DataFrame(['1016130'], columns=['Part'])
 
-pdf_bom_df = pd.DataFrame([[part, 0, 'DIDNT WORK']],
-                        columns=['PART NUMBER', 'QTY', 'FUNCTION'])
+bins = bin_locations.get_bins(part_df)
 
-
-print(pdf_bom_df)
+print(bins.columns)
