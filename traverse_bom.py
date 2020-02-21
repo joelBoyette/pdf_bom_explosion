@@ -9,12 +9,22 @@ warnings.filterwarnings("ignore")
 epicor_data = pd.read_excel(r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',
                             sheet_name='epicor_part_data')
 
-subassy_df = pd.read_excel(r'\\Vfile\d\MaterialPlanning\MPPublic\manufactured_part_routings.xlsm')
+min_due = pd.read_excel(r'\\vfile\MPPublic\pdf_bom_explosion\mindue_inspOH_data.xlsm',
+                        sheet_name='min_due')
 
+inspect_oh = pd.read_excel(r'\\vfile\MPPublic\pdf_bom_explosion\mindue_inspOH_data.xlsm',
+                           sheet_name='inspect_oh')
+inspect_oh['PartNum'] = inspect_oh['PartNum'].astype(str)
+
+# add min due date and inspection OH
+epicor_data = epicor_data.merge(min_due[['PartNum', 'First Due']], on='PartNum', how='left')
+epicor_data = epicor_data.merge(inspect_oh[['PartNum', 'SumOfOurQty']], on='PartNum', how='left')
+epicor_data = epicor_data.rename(columns={'SumOfOurQty': 'OH_Inspect'})
+
+subassy_df = pd.read_excel(r'\\Vfile\d\MaterialPlanning\MPPublic\manufactured_part_routings.xlsm')
 subassy_df = subassy_df.loc[(subassy_df['ResourceGrpID'] != 'FAB')
                             & (subassy_df['ResourceGrpID'].str[0:4] != 'ELEC')
-                            & (subassy_df['ResourceGrpID'].str[0:4] != 'HOSE')
-                            ]
+                            & (subassy_df['ResourceGrpID'].str[0:4] != 'HOSE')]
 subassy_df = subassy_df['MtlPartNum'].unique()
 
 
@@ -41,7 +51,7 @@ def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\', ignore
         if not ignore_epicor:
 
             df = df.merge(epicor_data[['PartNum', 'PartDescription', 'PhantomBOM', 'TypeCode',
-                                       'Cost', 'OH', 'ONO', 'DMD', 'Buyer']],
+                                       'Cost', 'OH', 'ONO', 'DMD', 'Buyer', 'First Due', 'OH_Inspect']],
                           left_on='PART NUMBER', right_on='PartNum', how='left').fillna(0)
 
             df = df.drop('PartNum', axis=1)

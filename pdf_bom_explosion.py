@@ -1,20 +1,20 @@
 import datetime
-
-import traverse_bom
-import bin_locations
-
 import pandas as pd
 import warnings
 from openpyxl import load_workbook
 from openpyxl.styles import Font
+
+import traverse_bom
+import bin_locations
+
 warnings.filterwarnings("ignore")
 
 
 def supply_status(std, total_qty,
                   oh, ono, insp_oh,
                   p_type, due_date):
-    today = pd.to_datetime(datetime.now().strftime('%Y-%m-%d'))
-    due = pd.to_datetime(due_date.strftime('%Y-%m-%d'))
+    today = pd.to_datetime(datetime.datetime.now().strftime('%Y-%m-%d'))
+    due = pd.to_datetime(due_date).strftime('%Y-%m-%d')
     if std == 0.0001:
         return 'Expense'
     elif total_qty == 0.0:
@@ -43,6 +43,18 @@ print('---------------exploding assembly---------------')
 bom_explosion_df = traverse_bom.explode_bom(top_level='1021337', make_qty=1, ignore_epicor=False)
 bom_explosion_df = bom_explosion_df.rename(columns={'PART NUMBER': 'Part',
                                                     'QTY': 'Comp Q/P'})
+
+print('---------------getting supply status---------------')
+bom_expl_sum = bom_explosion_df.groupby('Part', as_index=False)['Comp Extd Qty']\
+                               .sum()\
+                               .rename(columns={'Comp Extd Qty': 'Total Needed'})
+
+bom_explosion_df = bom_explosion_df.merge(bom_expl_sum[['Part', 'Total Needed']], on='Part', how='left')
+bom_explosion_df['Supply Status'] = bom_explosion_df.apply(lambda x:
+                                                           supply_status(x['Cost'], x['Total Needed'],
+                                                                         x['OH'], x['ONO'],
+                                                                         x['OH_Inspect'], x['TypeCode'],
+                                                                         x['First Due']), axis=1)
 
 # Get floor locations for components
 print('---------------getting floor locations---------------')
@@ -80,11 +92,11 @@ if not bom_explosion_df.empty:
     for i, row in enumerate(part_list):
 
         # sets hyperlink value
-        sheet.cell(row=i+2, column=17).value = \
+        sheet.cell(row=i+2, column=19).value = \
             f'=HYPERLINK("{file_path}{part_list[i]}.pdf","print")'
 
         # sets hyperlink format
-        sheet.cell(row=i+2, column=17).font = Font(underline='single', color='0563C1')
+        sheet.cell(row=i+2, column=19).font = Font(underline='single', color='0563C1')
 
     sheet.freeze_panes = 'A2'
     writer.save()
