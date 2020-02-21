@@ -40,7 +40,7 @@ def supply_status(std, total_qty,
 
 # Explode Assembly
 print('---------------exploding assembly---------------')
-bom_explosion_df = traverse_bom.explode_bom(top_level='1021337', make_qty=1, ignore_epicor=False)
+bom_explosion_df = traverse_bom.explode_bom(top_level='1021045', make_qty=1, ignore_epicor=False)
 bom_explosion_df = bom_explosion_df.rename(columns={'PART NUMBER': 'Part',
                                                     'QTY': 'Comp Q/P'})
 
