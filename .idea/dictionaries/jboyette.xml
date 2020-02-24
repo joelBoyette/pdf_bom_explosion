@@ -9,6 +9,7 @@
       <w>extd</w>
       <w>insp</w>
       <w>openpyxl</w>
+      <w>tabulapy</w>
       <w>xlsx</w>
     </words>
   </dictionary>

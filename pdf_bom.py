@@ -210,7 +210,6 @@ def clean_pdf_camelot_scale15(part, file_path):
             elif 'NUMBER QTY' == str(x):
                 find_column_dict = {'column': column_name, 'clean type': 'NUMBER QTY'}
 
-
     clean_type = find_column_dict['clean type']
 
     col_index = pdf_df.columns.get_loc(find_column_dict['column'])
@@ -847,6 +846,7 @@ def read_pdf_bom(part, file_path):
         except:
             try:
                 pdf_bom_df = clean_pdf_camelot_scale10(part, file_path)
+                print('doing stuff here 3')
                 any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
                 alpha_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
                 blank_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
@@ -936,3 +936,8 @@ def read_pdf_bom(part, file_path):
         r'^\s*$', regex=True)]
 
     return pdf_bom_all_df
+
+
+# df = clean_pdf_tabulapy('1020322', r'\\vimage\latest'+'\\')
+#
+# print(df)

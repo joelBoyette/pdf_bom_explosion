@@ -3,6 +3,7 @@ import pandas as pd
 import warnings
 from openpyxl import load_workbook
 from openpyxl.styles import Font
+import re
 
 import traverse_bom
 import bin_locations
@@ -32,57 +33,49 @@ def supply_status(std, total_qty,
     else:
         return 'Short'
 
-# parts_df['Overall Status'] = parts_df.apply(lambda x: supply_status(x['Std'], x['Total Qty'],
-#                                                                   x['sum_OH'], x['ONO'],
-#                                                                   x['OH_Inspect'], x['Type'],
-#                                                                   x['minDueDate']), axis=1)
-
 
 # Explode Assembly
 print('---------------exploding assembly---------------')
-bom_explosion_df = traverse_bom.explode_bom(top_level='1021045', make_qty=1, ignore_epicor=False)
+bom_explosion_df = traverse_bom.explode_bom(top_level='1016217', make_qty=1)
 bom_explosion_df = bom_explosion_df.rename(columns={'PART NUMBER': 'Part',
                                                     'QTY': 'Comp Q/P'})
 
-print('---------------getting supply status---------------')
-bom_expl_sum = bom_explosion_df.groupby('Part', as_index=False)['Comp Extd Qty']\
-                               .sum()\
-                               .rename(columns={'Comp Extd Qty': 'Total Needed'})
-
-bom_explosion_df = bom_explosion_df.merge(bom_expl_sum[['Part', 'Total Needed']], on='Part', how='left')
-bom_explosion_df['Supply Status'] = bom_explosion_df.apply(lambda x:
-                                                           supply_status(x['Cost'], x['Total Needed'],
-                                                                         x['OH'], x['ONO'],
-                                                                         x['OH_Inspect'], x['TypeCode'],
-                                                                         x['First Due']), axis=1)
-
-# Get floor locations for components
-print('---------------getting floor locations---------------')
-bin_df = bin_locations.get_bins(bom_explosion_df)
-
-# Add bin data to df
-bom_explosion_df = bom_explosion_df.merge(bin_df[['Part', 'Main Bins', 'Floor Bins']],
-                                          on='Part', how='left')
-
-bom_explosion_df = bom_explosion_df.drop(['FUNCTION', 'PhantomBOM', 'sub'], axis=1)
-
-print('---------------writing to excel---------------')
 if not bom_explosion_df.empty:
 
-    # Load xlsx and clear old data
-    excel_book = r'C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion\output.xlsx'
-    book = load_workbook(excel_book)
-    book['Sheet1'].sheet_state = 'visible'
+    print('---------------getting supply status---------------')
+    bom_expl_sum = bom_explosion_df.groupby('Part', as_index=False)['Comp Extd Qty']\
+                                   .sum()\
+                                   .rename(columns={'Comp Extd Qty': 'Total Needed'})
 
-    keep_sheets = ['Sheet1']
-    for sheetName in book.sheetnames:
-        if sheetName not in keep_sheets:
-            del book[sheetName]
-    book.save(excel_book)
+    bom_explosion_df = bom_explosion_df.merge(bom_expl_sum[['Part', 'Total Needed']], on='Part', how='left')
 
-    #  Create a Pandas Excel writer using openpyxl as the engine.
-    writer = pd.ExcelWriter(excel_book, engine='openpyxl')
-    writer.book = book
+    bom_explosion_df['Supply Status'] = bom_explosion_df.apply(lambda x:
+                                                               supply_status(x['Cost'], x['Total Needed'],
+                                                                             x['OH'], x['ONO'],
+                                                                             x['OH_Inspect'], x['TypeCode'],
+                                                                             x['First Due']), axis=1)
+
+    print('---------------getting floor locations---------------')
+    # Get floor locations for components
+    bin_df = bin_locations.get_bins(bom_explosion_df)
+
+    # Add bin data to df
+    bom_explosion_df = bom_explosion_df.merge(bin_df[['Part', 'Main Bins', 'Floor Bins']],
+                                              on='Part', how='left')
+
+    if traverse_bom.explode_bom.passed_args['ignore_epicor']:
+        bom_explosion_df = bom_explosion_df.drop(['FUNCTION', 'PhantomBOM'], axis=1)
+    else:
+        bom_explosion_df = bom_explosion_df.drop(['FUNCTION', 'PhantomBOM', 'sub'], axis=1)
+
+    print('---------------writing to excel---------------')
+    # Create a Pandas Excel writer using openpyxl as the engine.
+    assy_part = traverse_bom.explode_bom.passed_args['top_level']
+    file_date = datetime.datetime.now().strftime("%m-%d-%Y")
+    writer = pd.ExcelWriter(r'C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion'
+                            + '\\' + re.escape(assy_part) + f'_{file_date}.xlsx',
+                            engine='openpyxl')
+    book = writer.book
     bom_explosion_df.to_excel(writer, sheet_name='bom_explosion', index=False)
 
     # add hyperlink for print

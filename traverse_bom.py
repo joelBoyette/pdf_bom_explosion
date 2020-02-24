@@ -82,6 +82,11 @@ def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\', ignore
         else:
 
             # do not care about epicor flags, keep exploding as long as prints have BOM's
+            df = df.merge(epicor_data[['PartNum', 'PartDescription', 'PhantomBOM', 'TypeCode',
+                                       'Cost', 'OH', 'ONO', 'DMD', 'Buyer', 'First Due', 'OH_Inspect']],
+                          left_on='PART NUMBER', right_on='PartNum', how='left').fillna(0)
+            df = df.drop('PartNum', axis=1)
+
             df_no_explode = df
 
             df_no_explode['# Top Level to Make'] = make_qty / explode_bom.assy_qp
