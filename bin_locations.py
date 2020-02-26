@@ -1,9 +1,10 @@
 import pandas as pd
+from excel_access_run_macro import run_excel_macro
 
 
 def get_bins(part_df):
 
-    part_df['Part'] = part_df['Part'].astype(str)
+    run_excel_macro(r'\\vfile\MPPublic\Projects\NPD\NPD_data.xlsm', macros=['refresh_bin_contents'])
 
     bins_df = pd.read_excel(r'\\vfile\MPPublic\Projects\NPD\NPD_data.xlsm', sheet_name='bin_contents')
     bins_df['Bin'] = bins_df['Bin'].astype(str)
@@ -22,6 +23,7 @@ def get_bins(part_df):
     # combine main bins detail
     if not main_df.empty:
 
+        part_df['Part'] = part_df['Part'].astype(str)
         part_df = part_df.merge(main_df[['Part', 'WH', 'Bin', 'Bin OH']], on='Part', how='left')
         part_df = part_df.fillna('')
 

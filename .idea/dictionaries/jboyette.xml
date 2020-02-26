@@ -10,6 +10,7 @@
       <w>insp</w>
       <w>openpyxl</w>
       <w>tabulapy</w>
+      <w>vfile</w>
       <w>xlsx</w>
     </words>
   </dictionary>

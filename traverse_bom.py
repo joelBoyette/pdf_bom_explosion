@@ -3,7 +3,16 @@ import pdf_bom
 
 import pandas as pd
 import warnings
+from excel_access_run_macro import run_excel_macro, run_access_macro
+
+
 warnings.filterwarnings("ignore")
+
+run_access_macro(access_path=r'\\vfile\MPPublic\Kanban Projects\Kanban.accdb',
+                 macros=['update_oh,ono,dmd_macro'])
+
+run_excel_macro(excel_path=r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',
+                macros=['refresh_epicor_data'])
 
 
 epicor_data = pd.read_excel(r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',

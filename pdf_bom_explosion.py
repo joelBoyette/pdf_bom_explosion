@@ -1,7 +1,6 @@
 import datetime
 import pandas as pd
 import warnings
-from openpyxl import load_workbook
 from openpyxl.styles import Font
 import re
 
@@ -36,7 +35,7 @@ def supply_status(std, total_qty,
 
 # Explode Assembly
 print('---------------exploding assembly---------------')
-bom_explosion_df = traverse_bom.explode_bom(top_level='1016217', make_qty=1)
+bom_explosion_df = traverse_bom.explode_bom(top_level='1021747', make_qty=1)
 bom_explosion_df = bom_explosion_df.rename(columns={'PART NUMBER': 'Part',
                                                     'QTY': 'Comp Q/P'})
 
