@@ -846,7 +846,6 @@ def read_pdf_bom(part, file_path):
         except:
             try:
                 pdf_bom_df = clean_pdf_camelot_scale10(part, file_path)
-                print('doing stuff here 3')
                 any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
                 alpha_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
                 blank_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
