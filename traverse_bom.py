@@ -1,20 +1,24 @@
 
 import pdf_bom
-
 import pandas as pd
+import logging
+logger = logging.getLogger(__name__)
+import datetime
 import warnings
-from excel_access_run_macro import run_excel_macro, run_access_macro
-
-
 warnings.filterwarnings("ignore")
+import numpy as np
+from openpyxl.styles import Font
+import re
 
-run_access_macro(access_path=r'\\vfile\MPPublic\Kanban Projects\Kanban.accdb',
-                 macros=['update_oh,ono,dmd_macro'])
+# from excel_access_run_macro import run_excel_macro, run_access_macro
+# run_access_macro(access_path=r'\\vfile\MPPublic\Kanban Projects\Kanban.accdb',
+#                  macros=['update_oh,ono,dmd_macro'])
+#
+# run_excel_macro(excel_path=r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',
+#                 macros=['refresh_epicor_data'])
 
-run_excel_macro(excel_path=r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',
-                macros=['refresh_epicor_data'])
-
-
+print('---------------retrieving epicor data---------------')
+logger.critical('---------------retrieving epicor data---------------')
 epicor_data = pd.read_excel(r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',
                             sheet_name='epicor_part_data')
 
@@ -37,6 +41,7 @@ subassy_df = subassy_df.loc[(subassy_df['ResourceGrpID'] != 'FAB')
 subassy_df = subassy_df['MtlPartNum'].unique()
 
 
+# recursion thorugh the BOM
 def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\', ignore_epicor=False):
 
     explode_bom.passed_args = locals()
@@ -45,9 +50,12 @@ def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\', ignore
     explode_bom.assy_qty = make_qty
     explode_bom.sort_path += '\\' + explode_bom.part
 
-    print(f'traverse bom part {explode_bom.part} '
-          f'level {explode_bom.level} path {explode_bom.sort_path} '
-          f'assy qty {explode_bom.assy_qty}')
+    logging_information = f'traverse bom part {explode_bom.part} '\
+                          f'level {explode_bom.level} path {explode_bom.sort_path} '\
+                          f'assy qty {explode_bom.assy_qty}'
+
+    print(logging_information)
+    logger.critical(logging_information)
 
     # Get bom from pdf and merge epicor data
     df = pdf_bom.read_pdf_bom(explode_bom.part, file_path)
@@ -139,9 +147,132 @@ def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\', ignore
     return explode_bom.df_final
 
 
-# setup recursion variables
-explode_bom.df_final = pd.DataFrame()
-explode_bom.level = 0
-explode_bom.sort_path = ''
-explode_bom.assy_qty = 0
-explode_bom.assy_qp = 1
+def supply_status(std, total_qty,
+                  oh, ono, insp_oh,
+                  p_type, due_date):
+    today = pd.to_datetime(datetime.datetime.now()).strftime('%Y-%m-%d')
+    due = pd.to_datetime(due_date).strftime('%Y-%m-%d')
+    if std == 0.0001:
+        return 'Expense'
+    elif total_qty == 0.0:
+        return 'Consumed'
+    elif oh >= total_qty:
+        return 'Available'
+    elif ono > total_qty and due < today:
+        return 'Late'
+    elif insp_oh + oh + ono >= total_qty and ono != 0.0:
+        return 'ONO'
+    elif p_type == 'M':
+        return 'Mfg in house'
+    elif insp_oh > 0:
+        return 'Inspect'
+    else:
+        return 'Short'
+
+
+# Explode Assembly
+def explode_assembly(top_level_input, qty_input):
+
+    print('---------------exploding assembly---------------')
+    logger.critical('---------------exploding assembly---------------')
+    # setup recursion variables
+    explode_bom.df_final = pd.DataFrame()
+    explode_bom.level = 0
+    explode_bom.sort_path = ''
+    explode_bom.assy_qty = 0
+    explode_bom.assy_qp = 1
+
+    # perform bom recursion
+    bom_explosion_df = explode_bom(top_level=top_level_input, make_qty=int(qty_input))
+    bom_explosion_df = bom_explosion_df.rename(columns={'PART NUMBER': 'Part',
+                                                        'QTY': 'Comp Q/P'})
+    if not bom_explosion_df.empty:
+
+        print('---------------getting supply status---------------')
+        logger.critical('---------------getting supply status---------------')
+        bom_expl_sum = bom_explosion_df.groupby('Part', as_index=False)['Comp Extd Qty'] \
+            .sum() \
+            .rename(columns={'Comp Extd Qty': 'Total Needed'})
+
+        bom_explosion_df = bom_explosion_df.merge(bom_expl_sum[['Part', 'Total Needed']], on='Part', how='left')
+
+        bom_explosion_df['Supply Status'] = bom_explosion_df.apply(lambda x:
+                                                                   supply_status(x['Cost'], x['Total Needed'],
+                                                                                 x['OH'], x['ONO'],
+                                                                                 x['OH_Inspect'], x['TypeCode'],
+                                                                                 x['First Due']), axis=1)
+
+        print('---------------getting floor locations---------------')
+        logger.critical('---------------getting floor locations---------------')
+        import bin_locations
+        # Get floor locations for components
+        bin_df = bin_locations.get_bins(bom_explosion_df)
+
+        # Add bin data to df
+        bom_explosion_df = bom_explosion_df.merge(bin_df[['Part', 'Main Bins', 'Floor Bins']],
+                                                  on='Part', how='left')
+
+        if explode_bom.passed_args['ignore_epicor']:
+            bom_explosion_df = bom_explosion_df.drop(['FUNCTION', 'PhantomBOM'], axis=1)
+        else:
+            bom_explosion_df = bom_explosion_df.drop(['FUNCTION', 'PhantomBOM', 'sub'], axis=1)
+
+        print('---------------Formatting and writing to excel---------------')
+        logger.critical('---------------Formatting and writing to excel---------------')
+        bom_explosion_df['Top Level'] = bom_explosion_df['Sort Path'][0][1:]
+        bom_explosion_df['BOM Details [BOM Path | Parent Q/P | Comp Q/P]'] = \
+            bom_explosion_df[['Sort Path', 'Assembly Q/P', 'Comp Q/P']].astype(str) \
+                .apply(lambda x: '[' + '-'.join(x) + ']' + '\n' if x.all != '' else set(x), axis=1)
+
+        bom_explosion_df = bom_explosion_df.rename(columns={'PartDescription': 'Description',
+                                                            'TypeCode': 'Type'})
+
+        bom_explosion_df['Dwg Link'] = ''
+        bom_explosion_df = bom_explosion_df[
+            ['Part', 'Description', 'Type', 'Dwg Link', 'Total Needed', 'Supply Status',
+             'Main Bins', 'Floor Bins', 'OH', 'OH_Inspect', 'ONO', 'First Due', 'DMD',
+             'Buyer', 'Cost', 'Top Level', '# Top Level to Make',
+             'BOM Details [BOM Path | Parent Q/P | Comp Q/P]']]
+        bom_explosion_df = bom_explosion_df.astype(str)
+
+        # https://thispointer.com/python-how-to-use-if-else-elif-in-lambda-functions/
+        pivot_f = lambda x: x.sum() if np.issubdtype(x.dtype, np.number) \
+            else (''.join(list(set(x)))
+                  if x.name in ['BOM Details [BOM Path | Parent Q/P | Comp Q/P]']
+                  else list(set(x))[0])
+
+        cols = bom_explosion_df.columns[~bom_explosion_df.columns.isin(['Part'])].tolist()
+        pivtbl = pd.pivot_table(bom_explosion_df,
+                                index=['Part'],
+                                values=cols,
+                                aggfunc=pivot_f,
+                                fill_value='').reindex(columns=cols).reset_index()
+
+        # Create a Pandas Excel writer using openpyxl as the engine.
+        assy_part = bom_explosion_df['Top Level'][0]
+        file_date = datetime.datetime.now().strftime("%m-%d-%Y")
+        writer = pd.ExcelWriter(r'\\vfile\MPPublic\pdf_bom_explosion'
+                                + '\\' + re.escape(assy_part) + f'_{file_date}.xlsx',
+                                engine='openpyxl')
+        book = writer.book
+        pivtbl.to_excel(writer, sheet_name='bom_explosion', index=False)
+
+        # add hyperlink for print
+        sheet = book['bom_explosion']
+        part_list = pivtbl['Part'].tolist()
+        file_path = explode_bom.passed_args['file_path']
+        for i, row in enumerate(part_list):
+            # sets hyperlink value
+            sheet.cell(row=i + 2, column=4).value = \
+                f'=HYPERLINK("{file_path}{part_list[i]}.pdf","print")'
+
+            # sets hyperlink format
+            sheet.cell(row=i + 2, column=4).font = Font(underline='single', color='0563C1')
+
+        sheet.freeze_panes = 'A2'
+        writer.save()
+
+        print('Done!')
+        logger.critical('---------------Done! - File Location Below---------------')
+        logger.critical(r'\\vfile\MPPublic\pdf_bom_explosion'
+                        + '\\' + re.escape(assy_part) + f'_{file_date}.xlsx')

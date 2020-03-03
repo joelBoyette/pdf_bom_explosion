@@ -1,0 +1,10 @@
+ 03-Mar-20 14:27:17: traverse_bom.py <module>() ln 21 [CRITICAL] ---------------retrieving epicor data---------------
+ 03-Mar-20 14:27:39: traverse_bom.py explode_assembly() ln 177 [CRITICAL] ---------------exploding assembly---------------
+ 03-Mar-20 14:27:39: traverse_bom.py explode_bom() ln 58 [CRITICAL] traverse bom part 1021337 level 0 path \1021337 assy qty 1
+ 03-Mar-20 14:27:45: traverse_bom.py explode_bom() ln 58 [CRITICAL] traverse bom part 1016214 level 1 path \1021337\1016214 assy qty 1
+ 03-Mar-20 14:27:49: traverse_bom.py explode_bom() ln 58 [CRITICAL] traverse bom part 1021336 level 1 path \1021337\1021336 assy qty 1
+ 03-Mar-20 14:28:12: traverse_bom.py explode_assembly() ln 192 [CRITICAL] ---------------getting supply status---------------
+ 03-Mar-20 14:28:12: traverse_bom.py explode_assembly() ln 206 [CRITICAL] ---------------getting floor locations---------------
+ 03-Mar-20 14:28:20: traverse_bom.py explode_assembly() ln 221 [CRITICAL] ---------------Formatting and writing to excel---------------
+ 03-Mar-20 14:28:20: traverse_bom.py explode_assembly() ln 276 [CRITICAL] ---------------Done! - File Location Below---------------
+ 03-Mar-20 14:28:20: traverse_bom.py explode_assembly() ln 278 [CRITICAL] C:\Users\JBoyette.BRLEE\Documents\Development\test_data\pdf_bom_explosion\1021337_03-03-2020.xlsx

@@ -1,3 +1,7 @@
+import logging
+logging.getLogger('pdfdocument').setLevel(logging.CRITICAL)
+logging.getLogger('pdfinterp').setLevel(logging.CRITICAL)
+
 import camelot
 import tabula
 import re
