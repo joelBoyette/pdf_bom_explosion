@@ -3,10 +3,10 @@ import threading
 import logging
 import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
-
-
 from log_config import log_location, log_filemode, log_format, log_datefmt
 
+# pyinstaller to make a distribution file for users to use program
+# https://pyinstaller.readthedocs.io/en/stable/usage.html
 
 # https://stackoverflow.com/questions/13318742/python-logging-to-tkinter-text-widget
 class TextHandler(logging.Handler):

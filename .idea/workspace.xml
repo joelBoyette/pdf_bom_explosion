@@ -2,17 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dd931606-b969-4101-bc3c-8542ba0c3935" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/app.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dummy_files/dummy_gui.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dummy_files/dummy_recursion.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pdf_explosion_gui_app.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin_locations.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin_locations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/app.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/log_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/log_config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pdf_bom.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdf_bom.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pdf_explosion_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdf_explosion_app_OLD.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/traverse_bom.py" beforeDir="false" afterPath="$PROJECT_DIR$/traverse_bom.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdf_explosion_gui_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdf_explosion_gui_app.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

@@ -1,7 +1,4 @@
 import logging
-logging.getLogger('pdfdocument').setLevel(logging.CRITICAL)
-logging.getLogger('pdfinterp').setLevel(logging.CRITICAL)
-
 import camelot
 import tabula
 import re
@@ -10,6 +7,7 @@ import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
+logger = logging.getLogger(__name__)
 
 # #################### TABULA PY  ############################
 # https://tabula-py.readthedocs.io/en/latest/getting_started.html#example
@@ -921,7 +919,9 @@ def read_pdf_bom(part, file_path):
                                                 blank_qty = pdf_bom_df[:-1].loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
                                                 if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
                                                     raise Exception
-                                            except:
+                                            except Exception as e:
+
+                                                logger.critical(e)
                                                 print(f' no methods worked for {part}')
                                                 pdf_bom_df = pd.DataFrame(
                                                     columns=['PART NUMBER', 'QTY', 'FUNCTION'])
