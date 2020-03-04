@@ -42,7 +42,7 @@ subassy_df = subassy_df['MtlPartNum'].unique()
 
 
 # recursion thorugh the BOM
-def explode_bom(top_level, make_qty, file_path=r'\\vimage\latest' + '\\', ignore_epicor=False):
+def explode_bom(top_level, make_qty, file_path, ignore_epicor):
 
     explode_bom.passed_args = locals()
 
@@ -171,7 +171,9 @@ def supply_status(std, total_qty,
 
 
 # Explode Assembly
-def explode_assembly(top_level_input, qty_input):
+def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor):
+
+    file_path += '\\'
 
     print('---------------exploding assembly---------------')
     logger.critical('---------------exploding assembly---------------')
@@ -183,7 +185,8 @@ def explode_assembly(top_level_input, qty_input):
     explode_bom.assy_qp = 1
 
     # perform bom recursion
-    bom_explosion_df = explode_bom(top_level=top_level_input, make_qty=int(qty_input))
+    bom_explosion_df = explode_bom(top_level=top_level_input, make_qty=int(qty_input),
+                                   file_path=file_path, ignore_epicor=ignore_epicor)
     bom_explosion_df = bom_explosion_df.rename(columns={'PART NUMBER': 'Part',
                                                         'QTY': 'Comp Q/P'})
     if not bom_explosion_df.empty:

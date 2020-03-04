@@ -8,6 +8,10 @@ from log_config import log_location, log_filemode, log_format, log_datefmt
 # pyinstaller to make a distribution file for users to use program
 # https://pyinstaller.readthedocs.io/en/stable/usage.html
 
+# https://www.ghostscript.com/download/gsdnld.html
+# user must install Ghostscript 9.50 for Windows (64 bit) on machines for exe to work
+
+
 # https://stackoverflow.com/questions/13318742/python-logging-to-tkinter-text-widget
 class TextHandler(logging.Handler):
     # This class allows you to log to a Tkinter Text or ScrolledText widget
@@ -45,16 +49,33 @@ class PDFAppGUI(tk.Frame):
         # creates labels and text boxes
         self.top_level_lbl = tk.Label(self.root, text='Top Level', padx=20, pady=10)
         self.top_level_lbl.grid(column=0, row=0)
+
         self.top_level_txtbx = tk.Entry(self.root, width=10)
         self.top_level_txtbx.grid(column=0, row=1, padx=1, pady=1)
+
         self.qty_lbl = tk.Label(self.root, text='Make Qty', padx=20, pady=10)
-        self.qty_lbl.grid(column=0, row=2)
+        self.qty_lbl.grid(column=1, row=0)
+
         self.qty_txtbx = tk.Entry(self.root, width=10)
-        self.qty_txtbx.grid(column=0, row=3, padx=1, pady=10)
+        self.qty_txtbx.grid(column=1, row=1, padx=1, pady=10)
+
+        self.path_lbl = tk.Label(self.root, text="Path to PDF's (if not latest)", padx=20, pady=10)
+        self.path_lbl.grid(column=2, row=0, padx=1, pady=10)
+
+        self.path_txtbx = tk.Entry(self.root, width=40)
+        self.path_txtbx.grid(column=2, row=1, padx=1, pady=10)
+
+        self.epicor_flags_lbl = tk.Label(self.root, text="Ignore Epicor Structure", padx=20, pady=10)
+        self.epicor_flags_lbl.grid(column=3, row=0, padx=1, pady=10)
+
+        self.epicor_flag_value = tk.IntVar()
+        self.epicor_flags_cb = tk.Checkbutton(self.root, text="", variable=self.epicor_flag_value, padx=90, pady=1)
+        self.epicor_flags_cb.grid(column=3, row=1, sticky='w')
+        # to get the flag value, will be 1 if checked, 0 if not
+        # print(self.epicor_flag_value.get())
+
         self.btn = tk.Button(self.root, text="Explode BOM", padx=1, pady=1, command=self.explode_assembly_final)
-        self.btn.grid(column=0, row=5)
-        self.log_lbl = tk.Label(self.root, text='Log')
-        self.log_lbl.grid(column=0, row=6)
+        self.btn.grid(column=0, row=6, padx=1, pady=10)
 
     def build_gui(self):
 
@@ -69,9 +90,9 @@ class PDFAppGUI(tk.Frame):
         self.grid_columnconfigure(3, weight=1, uniform='a')
 
         # Add text widget to display logging info
-        st = ScrolledText.ScrolledText(self.root, state='disabled')
+        st = ScrolledText.ScrolledText(self.root, state='disabled', width=100, height=30)
+        st.grid(column=0, row=8, sticky='w', columnspan=8)
         st.configure(font='TkFixedFont')
-        st.grid(column=0, row=8, sticky='w', columnspan=4)
 
         # Create textLogger
         text_handler = TextHandler(st)
@@ -87,17 +108,23 @@ class PDFAppGUI(tk.Frame):
         logger = logging.getLogger()
         logger.addHandler(text_handler)
 
-    def explode_assembly_final(self, top_level=None, qty=None):
+    def explode_assembly_final(self, top_level=None, qty=None, path=r'\\vimage\latest' + '\\', ignore_epicor=False):
 
         import traverse_bom
 
         top_level = self.top_level_txtbx.get()
         qty = self.qty_txtbx.get()
 
-        explosion_thread = threading.Thread(target=traverse_bom.explode_assembly(top_level, qty))
+        if not self.path_txtbx.get() == '':
+            path = self.path_txtbx.get()
+
+        ignore_epicor = self.epicor_flag_value.get()
+        if ignore_epicor == 1:
+            ignore_epicor = True
+
+        explosion_thread = threading.Thread(target=traverse_bom.explode_assembly(top_level, qty, path, ignore_epicor))
         explosion_thread.start()
         explosion_thread.join()
-
 
 def main():
 

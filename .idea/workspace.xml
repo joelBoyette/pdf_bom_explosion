@@ -2,12 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dd931606-b969-4101-bc3c-8542ba0c3935" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/app.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/log_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pdf_bom.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdf_bom.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dummy_files/dummy_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/dummy_files/dummy_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dummy_files/dummy_recursion.py" beforeDir="false" afterPath="$PROJECT_DIR$/dummy_files/dummy_recursion.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pdf_explosion_gui_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdf_explosion_gui_app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/traverse_bom.py" beforeDir="false" afterPath="$PROJECT_DIR$/traverse_bom.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,7 +43,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.pdf_app_withGUI_class">
+  <component name="RunManager" selected="Python.pdf_explosion_gui_app">
     <configuration name="dummy_gui" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pdf_bom_explosion" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -108,7 +107,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pdf_explosion_app" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="pdf_explosion_gui_app" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pdf_bom_explosion" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -120,7 +119,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="C:\Users\JBoyette.BRLEE\Documents\Development\pdf_bom_explosion\pdf_explosion_app_OLD.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pdf_explosion_gui_app.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -151,19 +150,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.pdf_explosion_app" />
       <item itemvalue="Python.dummy_recursion" />
       <item itemvalue="Python.dummy_gui" />
       <item itemvalue="Python.pdf_app_withGUI_class" />
       <item itemvalue="Python.traverse_bom" />
+      <item itemvalue="Python.pdf_explosion_gui_app" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.pdf_explosion_gui_app" />
+        <item itemvalue="Python.dummy_gui" />
         <item itemvalue="Python.pdf_app_withGUI_class" />
         <item itemvalue="Python.traverse_bom" />
-        <item itemvalue="Python.dummy_gui" />
         <item itemvalue="Python.dummy_recursion" />
-        <item itemvalue="Python.pdf_explosion_app" />
       </list>
     </recent_temporary>
   </component>
