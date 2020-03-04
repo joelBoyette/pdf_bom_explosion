@@ -97,8 +97,8 @@ def explode_bom(top_level, make_qty, file_path, ignore_epicor):
             df_explode = df.loc[(df['PhantomBOM']) | (df['sub'] == 'yes')][['PART NUMBER', 'QTY']]
 
         else:
-
             # do not care about epicor flags, keep exploding as long as prints have BOM's
+
             df = df.merge(epicor_data[['PartNum', 'PartDescription', 'PhantomBOM', 'TypeCode',
                                        'Cost', 'OH', 'ONO', 'DMD', 'Buyer', 'First Due', 'OH_Inspect']],
                           left_on='PART NUMBER', right_on='PartNum', how='left').fillna(0)
@@ -130,7 +130,6 @@ def explode_bom(top_level, make_qty, file_path, ignore_epicor):
             for idx, df_row in df_explode.iterrows():
 
                 explode_bom.level += 1
-
                 explode_part = df_explode.loc[idx, 'PART NUMBER']
                 explode_qty = int(df_explode.loc[idx, 'QTY'])
                 explode_extd_qty = explode_bom.assy_qty * explode_qty

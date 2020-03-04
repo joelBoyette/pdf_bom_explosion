@@ -44,6 +44,7 @@ class PDFAppGUI(tk.Frame):
         # initiates and creates frame
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.root = parent
+        # self.root.config(bg="#CCE5FF")
         self.build_gui()
 
         # creates labels and text boxes
@@ -71,17 +72,16 @@ class PDFAppGUI(tk.Frame):
         self.epicor_flag_value = tk.IntVar()
         self.epicor_flags_cb = tk.Checkbutton(self.root, text="", variable=self.epicor_flag_value, padx=90, pady=1)
         self.epicor_flags_cb.grid(column=3, row=1, sticky='w')
-        # to get the flag value, will be 1 if checked, 0 if not
-        # print(self.epicor_flag_value.get())
 
-        self.btn = tk.Button(self.root, text="Explode BOM", padx=1, pady=1, command=self.explode_assembly_final)
-        self.btn.grid(column=0, row=6, padx=1, pady=10)
+        self.btn = tk.Button(self.root, text="Explode BOM", command=self.explode_assembly_final,
+                             padx=1, pady=1, bg='green', fg='White')
+        self.btn.grid(column=3, row=4, padx=1, pady=10)
 
     def build_gui(self):
 
         # Build GUI
-        self.root.title('TEST')
-        self.root.geometry('800x600')
+        self.root.title('PDF BOM Explosion/Shortage Report')
+        self.root.geometry('800x400')
         self.root.option_add('*tearOff', 'FALSE')
         self.grid(column=0, row=0, sticky='ew')
         self.grid_columnconfigure(0, weight=1, uniform='a')
@@ -90,8 +90,8 @@ class PDFAppGUI(tk.Frame):
         self.grid_columnconfigure(3, weight=1, uniform='a')
 
         # Add text widget to display logging info
-        st = ScrolledText.ScrolledText(self.root, state='disabled', width=100, height=30)
-        st.grid(column=0, row=8, sticky='w', columnspan=8)
+        st = ScrolledText.ScrolledText(self.root, state='disabled', width=80, height=10)
+        st.grid(column=0, row=8, sticky='w', columnspan=8, padx=15)
         st.configure(font='TkFixedFont')
 
         # Create textLogger
@@ -126,9 +126,11 @@ class PDFAppGUI(tk.Frame):
         explosion_thread.start()
         explosion_thread.join()
 
+
 def main():
 
     root = tk.Tk()
+
     pdf_app_gui = PDFAppGUI(root)
     root.mainloop()
 

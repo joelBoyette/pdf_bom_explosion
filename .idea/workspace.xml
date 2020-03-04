@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="dd931606-b969-4101-bc3c-8542ba0c3935" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dummy_files/dummy_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/dummy_files/dummy_gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dummy_files/dummy_recursion.py" beforeDir="false" afterPath="$PROJECT_DIR$/dummy_files/dummy_recursion.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pdf_explosion_gui_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdf_explosion_gui_app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/traverse_bom.py" beforeDir="false" afterPath="$PROJECT_DIR$/traverse_bom.py" afterDir="false" />
     </list>
