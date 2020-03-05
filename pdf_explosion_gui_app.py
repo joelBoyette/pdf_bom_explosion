@@ -5,6 +5,7 @@ import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
 from log_config import log_location, log_filemode, log_format, log_datefmt
 import refresh_epicor
+
 # pyinstaller to make a distribution file for users to use program
 # https://pyinstaller.readthedocs.io/en/stable/usage.html
 
@@ -71,15 +72,27 @@ class PDFAppGUI(tk.Frame):
         self.epicor_flags_lbl.grid(column=3, row=0, padx=1, pady=10)
 
         self.epicor_flag_value = tk.IntVar()
-        self.epicor_flags_cb = tk.Checkbutton(self.root, text="", variable=self.epicor_flag_value, padx=90, pady=1)
+        self.epicor_flags_cb = tk.Checkbutton(self.root, text="", variable=self.epicor_flag_value, padx=60, pady=1)
         self.epicor_flags_cb.grid(column=3, row=1, sticky='w')
+
+        self.email_supp_lbl = tk.Label(self.root, text="Email Prints", padx=20, pady=10)
+        self.email_supp_lbl.grid(column=0, row=2, padx=1, pady=10)
+
+        self.email_supp_value = tk.IntVar()
+        self.email_supp_cb = tk.Checkbutton(self.root, text="", variable=self.email_supp_value, padx=40, pady=1)
+        self.email_supp_cb.grid(column=0, row=3, sticky='w')
+
+        self.supp_lbl = tk.Label(self.root, text="Supplier Email", padx=20, pady=10)
+        self.supp_lbl.grid(column=1, row=2, padx=1, pady=10)
+
+        self.supp_txtbx = tk.Entry(self.root, width=30)
+        self.supp_txtbx.grid(column=1, row=3, padx=1, pady=10)
 
         self.explode_btn = tk.Button(self.root, text="Explode BOM", command=self.explode_assembly_final,
                                      padx=1, pady=1, bg='green', fg='White').grid(column=3, row=4, padx=1, pady=10)
 
         self.refresh_btn = tk.Button(self.root, text="Refresh Data", command=refresh_epicor.refresh_data,
                                      padx=1, pady=1, bg='Orange', fg='White').grid(column=1, row=4, padx=1, pady=10)
-
 
     def build_gui(self):
 
@@ -112,7 +125,9 @@ class PDFAppGUI(tk.Frame):
         logger = logging.getLogger()
         logger.addHandler(text_handler)
 
-    def explode_assembly_final(self, top_level=None, qty=None, path=r'\\vimage\latest' + '\\', ignore_epicor=False):
+    def explode_assembly_final(self, top_level=None, qty=None,
+                               path=r'\\vimage\latest' + '\\',
+                               ignore_epicor=False, email_supp=False, supp_adr=''):
 
         import traverse_bom
 
@@ -126,7 +141,19 @@ class PDFAppGUI(tk.Frame):
         if ignore_epicor == 1:
             ignore_epicor = True
 
-        explosion_thread = threading.Thread(target=traverse_bom.explode_assembly(top_level, qty, path, ignore_epicor))
+        # if email supplier check, mark true and get email address
+        email_supp = self.email_supp_value.get()
+        if email_supp == 1:
+            email_supp = True
+            supp_adr = self.supp_txtbx.get()
+
+        explosion_thread = threading.Thread(target=traverse_bom.explode_assembly(top_level,
+                                                                                 qty,
+                                                                                 path,
+                                                                                 ignore_epicor,
+                                                                                 email_supp,
+                                                                                 supp_adr))
+
         explosion_thread.start()
         explosion_thread.join()
 

@@ -1,4 +1,4 @@
-
+import win32com
 from win32com.client import Dispatch
 import pdf_bom
 import pandas as pd
@@ -165,7 +165,7 @@ def supply_status(std, total_qty,
 
 
 # Explode Assembly
-def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor):
+def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor, email_supp, supp_adr):
 
     file_path += '\\'
 
@@ -281,3 +281,35 @@ def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor):
         logger.critical('---------------Done! - File Location Below---------------')
         logger.critical(r'\\vfile\MPPublic\pdf_bom_explosion'
                         + '\\' + re.escape(assy_part) + f'_{file_date}.xlsx')
+
+        if email_supp:
+
+            outlook = win32com.client.DispatchEx('outlook.application')
+            mail = outlook.CreateItem(0)
+            mail.To = supp_adr
+            mail.CC = 'jboyette@leeboy.com'
+            mail.Subject = f'Please quote {top_level_input}'
+            mail.Body = ''
+            mail.HTMLBody = f"""
+                    <body>
+                        <p>attched component prints</p>
+                    </body>"""
+
+            for part in part_list:
+                try:
+                    base_url = r'\\vimage\latest' + '\\'
+                    part_num = f'{part}.pdf'
+                    attachment = base_url + part_num
+                    mail.Attachments.Add(attachment)
+                except:
+                    try:
+                        base_url = r'\\vimage\latest' + '\\'
+                        part_num = f'{part}.dwg'
+                        attachment = base_url + part_num
+                        mail.Attachments.Add(attachment)
+                    except:
+                        pass
+
+            mail.Send()
+
+
