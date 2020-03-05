@@ -4,7 +4,7 @@ import logging
 import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
 from log_config import log_location, log_filemode, log_format, log_datefmt
-
+import refresh_epicor
 # pyinstaller to make a distribution file for users to use program
 # https://pyinstaller.readthedocs.io/en/stable/usage.html
 
@@ -45,6 +45,7 @@ class PDFAppGUI(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.root = parent
         # self.root.config(bg="#CCE5FF")
+
         self.build_gui()
 
         # creates labels and text boxes
@@ -73,9 +74,12 @@ class PDFAppGUI(tk.Frame):
         self.epicor_flags_cb = tk.Checkbutton(self.root, text="", variable=self.epicor_flag_value, padx=90, pady=1)
         self.epicor_flags_cb.grid(column=3, row=1, sticky='w')
 
-        self.btn = tk.Button(self.root, text="Explode BOM", command=self.explode_assembly_final,
-                             padx=1, pady=1, bg='green', fg='White')
-        self.btn.grid(column=3, row=4, padx=1, pady=10)
+        self.explode_btn = tk.Button(self.root, text="Explode BOM", command=self.explode_assembly_final,
+                                     padx=1, pady=1, bg='green', fg='White').grid(column=3, row=4, padx=1, pady=10)
+
+        self.refresh_btn = tk.Button(self.root, text="Refresh Data", command=refresh_epicor.refresh_data,
+                                     padx=1, pady=1, bg='Orange', fg='White').grid(column=1, row=4, padx=1, pady=10)
+
 
     def build_gui(self):
 

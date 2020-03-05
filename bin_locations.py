@@ -1,10 +1,7 @@
 import pandas as pd
-from excel_access_run_macro import run_excel_macro
 
 
 def get_bins(part_df):
-
-    # run_excel_macro(r'\\vfile\MPPublic\Projects\NPD\NPD_data.xlsm', macros=['refresh_bin_contents'])
 
     bins_df = pd.read_excel(r'\\vfile\MPPublic\Projects\NPD\NPD_data.xlsm', sheet_name='bin_contents')
     bins_df['Bin'] = bins_df['Bin'].astype(str)

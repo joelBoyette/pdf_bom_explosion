@@ -14,7 +14,13 @@ logger = logging.getLogger(__name__)
 def clean_pdf_tabulapy(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
-    pdf_df = tabula.read_pdf(full_path, stream=True, pages=1)
+
+    try:
+        pdf_df = tabula.read_pdf(full_path, stream=True, pages=1)
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = tabula.read_pdf(default_path, stream=True, pages=1)
 
     find_column_dict = {}
     for (column_name, column_data) in pdf_df.iteritems():
@@ -192,8 +198,13 @@ def clean_pdf_camelot_scale15(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, line_scale=15, shift_text=[''])[0].df
+    try:
+        pdf_df = camelot.read_pdf(full_path, line_scale=15, shift_text=[''])[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, line_scale=15, shift_text=[''])[0].df
+
     pdf_df = pdf_df.replace('\\n', '', regex=True)
     find_column_dict = {}
     for (column_name, column_data) in pdf_df.iteritems():
@@ -258,9 +269,13 @@ def clean_pdf_camelot_scale15(part, file_path):
 def clean_pdf_camelot_scale10(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
+    try:
+        pdf_df = camelot.read_pdf(full_path, line_scale=10, shift_text=[''])[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, line_scale=10, shift_text=[''])[0].df
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, line_scale=10, shift_text=[''])[0].df
     pdf_df = pdf_df.replace('\\n', '', regex=True)
     find_column_dict = {}
     for (column_name, column_data) in pdf_df.iteritems():
@@ -323,8 +338,13 @@ def clean_pdf_camelot_scale5(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, line_scale=5, shift_text=[''])[0].df
+    try:
+        pdf_df = camelot.read_pdf(full_path, line_scale=5, shift_text=[''])[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, line_scale=5, shift_text=[''])[0].df
+
     pdf_df = pdf_df.replace('\\n', '', regex=True)
 
     find_column_dict = {}
@@ -386,8 +406,13 @@ def clean_pdf_camelot_stream(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, flavor='stream')[0].df
+    try:
+        pdf_df = camelot.read_pdf(full_path, flavor='stream')[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, flavor='stream')[0].df
+
     pdf_df = pdf_df.replace('\\n', '', regex=True)
 
     find_column_dict = {}
@@ -450,8 +475,13 @@ def clean_pdf_camelot_scale20(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, line_scale=20, shift_text=[''])[0].df
+    try:
+        pdf_df = camelot.read_pdf(full_path, line_scale=20, shift_text=[''])[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, line_scale=20, shift_text=[''])[0].df
+
     pdf_df = pdf_df.replace('\\n', '', regex=True)
 
     find_column_dict = {}
@@ -513,8 +543,13 @@ def clean_pdf_camelot_scale15_split_text(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, line_scale=15, shift_text=[''], split_text=True)[0].df
+    try:
+        pdf_df = camelot.read_pdf(full_path, line_scale=15, shift_text=[''], split_text=True)[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, line_scale=15, shift_text=[''], split_text=True)[0].df
+
     pdf_df = pdf_df.replace('\\n', '', regex=True)
 
     find_column_dict = {}
@@ -577,8 +612,13 @@ def clean_pdf_camelot_scale10_split_text(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, line_scale=10, shift_text=[''], split_text=True)[0].df
+    try:
+        pdf_df = camelot.read_pdf(full_path, line_scale=10, shift_text=[''], split_text=True)[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, line_scale=10, shift_text=[''], split_text=True)[0].df
+
     pdf_df = pdf_df.replace('\\n', '', regex=True)
 
     find_column_dict = {}
@@ -641,8 +681,13 @@ def clean_pdf_camelot_scale5_split_text(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, line_scale=5, shift_text=[''], split_text=True)[0].df
+    try:
+        pdf_df = camelot.read_pdf(full_path, line_scale=5, shift_text=[''], split_text=True)[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, line_scale=5, shift_text=[''], split_text=True)[0].df
+
     pdf_df = pdf_df.replace('\\n', '', regex=True)
 
     find_column_dict = {}
@@ -704,8 +749,13 @@ def clean_pdf_camelot_scale20_split_text(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, line_scale=20, shift_text=[''], split_text=True)[0].df
+    try:
+        pdf_df = camelot.read_pdf(full_path, line_scale=20, shift_text=[''], split_text=True)[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, line_scale=20, shift_text=[''], split_text=True)[0].df
+
     pdf_df = pdf_df.replace('\\n', '', regex=True)
     find_column_dict = {}
     for (column_name, column_data) in pdf_df.iteritems():
@@ -768,8 +818,13 @@ def clean_pdf_camelot_scale3(part, file_path):
 
     full_path = file_path + f'{part}.pdf'
 
-    # https://camelot-py.readthedocs.io/en/master/user/advanced.html
-    pdf_df = camelot.read_pdf(full_path, line_scale=3, shift_text=[''])[0].df
+    try:
+        pdf_df = camelot.read_pdf(full_path, line_scale=3, shift_text=[''])[0].df
+    except:
+        # if user supplied path doesnt work
+        default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
+        pdf_df = camelot.read_pdf(default_path, line_scale=3, shift_text=[''])[0].df
+
     pdf_df = pdf_df.replace('\\n', '', regex=True)
 
     find_column_dict = {}

@@ -1,23 +1,20 @@
 
+from win32com.client import Dispatch
 import pdf_bom
 import pandas as pd
 import logging
-logger = logging.getLogger(__name__)
 import datetime
 import warnings
-warnings.filterwarnings("ignore")
 import numpy as np
 from openpyxl.styles import Font
 import re
 
-# from excel_access_run_macro import run_excel_macro, run_access_macro
-# run_access_macro(access_path=r'\\vfile\MPPublic\Kanban Projects\Kanban.accdb',
-#                  macros=['update_oh,ono,dmd_macro'])
-#
-# run_excel_macro(excel_path=r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',
-#                 macros=['refresh_epicor_data'])
+
+warnings.filterwarnings("ignore")
+logger = logging.getLogger(__name__)
 
 print('---------------retrieving epicor data---------------')
+
 logger.critical('---------------retrieving epicor data---------------')
 epicor_data = pd.read_excel(r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',
                             sheet_name='epicor_part_data')
@@ -41,7 +38,7 @@ subassy_df = subassy_df.loc[(subassy_df['ResourceGrpID'] != 'FAB')
 subassy_df = subassy_df['MtlPartNum'].unique()
 
 
-# recursion thorugh the BOM
+# recursion through the BOM
 def explode_bom(top_level, make_qty, file_path, ignore_epicor):
 
     explode_bom.passed_args = locals()
@@ -82,7 +79,6 @@ def explode_bom(top_level, make_qty, file_path, ignore_epicor):
             df_no_explode['Assembly Q/P'] = explode_bom.assy_qp
             df_no_explode['Assembly Make Qty'] = df_no_explode['# Top Level to Make'] * df_no_explode['Assembly Q/P']
             df_no_explode['Comp Extd Qty'] = df_no_explode['Assembly Make Qty'] * df_no_explode['QTY'].astype(int)
-
             df_no_explode['Level'] = explode_bom.level
             df_no_explode['Sort Path'] = explode_bom.sort_path
             df_no_explode['Dwg Link'] = ''
@@ -90,7 +86,7 @@ def explode_bom(top_level, make_qty, file_path, ignore_epicor):
             # append non phantoms to final list
             explode_bom.df_final = explode_bom.df_final.append(df_no_explode)
 
-            # capture the sort path before recursion.  used to set the sort path on phantoms
+            # capture the sort path before recursion.  used to reset the sort path after phantom is traversed
             sort_path_reset = explode_bom.sort_path
 
             # check for phantoms and traverse boms
@@ -105,7 +101,6 @@ def explode_bom(top_level, make_qty, file_path, ignore_epicor):
             df = df.drop('PartNum', axis=1)
 
             df_no_explode = df
-
             df_no_explode['# Top Level to Make'] = make_qty / explode_bom.assy_qp
             df_no_explode['Assembly'] = explode_bom.part
             df_no_explode['Assembly Q/P'] = explode_bom.assy_qp
@@ -119,19 +114,19 @@ def explode_bom(top_level, make_qty, file_path, ignore_epicor):
             # append non phantoms to final list
             explode_bom.df_final = explode_bom.df_final.append(df_no_explode)
 
-            # capture the sort path before recursion.  used to set the sort path on phantoms
+            # capture the sort path before recursion.  used to reset the sort path after phantom is traversed
             sort_path_reset = explode_bom.sort_path
 
-            # check for phantoms and traverse boms
+            # there will never be phantoms due to ignoring flags so make df_explode equal the original df
             df_explode = df
 
         if not df_explode.empty:
 
-            for idx, df_row in df_explode.iterrows():
+            for df_idx, df_row in df_explode.iterrows():
 
                 explode_bom.level += 1
-                explode_part = df_explode.loc[idx, 'PART NUMBER']
-                explode_qty = int(df_explode.loc[idx, 'QTY'])
+                explode_part = df_explode.loc[df_idx, 'PART NUMBER']
+                explode_qty = int(df_explode.loc[df_idx, 'QTY'])
                 explode_extd_qty = explode_bom.assy_qty * explode_qty
                 explode_bom.assy_qp = explode_qty
 
@@ -206,7 +201,9 @@ def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor):
 
         print('---------------getting floor locations---------------')
         logger.critical('---------------getting floor locations---------------')
+
         import bin_locations
+
         # Get floor locations for components
         bin_df = bin_locations.get_bins(bom_explosion_df)
 
@@ -214,6 +211,7 @@ def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor):
         bom_explosion_df = bom_explosion_df.merge(bin_df[['Part', 'Main Bins', 'Floor Bins']],
                                                   on='Part', how='left')
 
+        # remove unneeded columns based on arguments passed
         if explode_bom.passed_args['ignore_epicor']:
             bom_explosion_df = bom_explosion_df.drop(['FUNCTION', 'PhantomBOM'], axis=1)
         else:
@@ -221,14 +219,13 @@ def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor):
 
         print('---------------Formatting and writing to excel---------------')
         logger.critical('---------------Formatting and writing to excel---------------')
+
         bom_explosion_df['Top Level'] = bom_explosion_df['Sort Path'][0][1:]
         bom_explosion_df['BOM Details [BOM Path | Parent Q/P | Comp Q/P]'] = \
             bom_explosion_df[['Sort Path', 'Assembly Q/P', 'Comp Q/P']].astype(str) \
-                .apply(lambda x: '[' + '-'.join(x) + ']' + '\n' if x.all != '' else set(x), axis=1)
+            .apply(lambda x: '[' + '-'.join(x) + ']' + '\n' if x.all != '' else set(x), axis=1)
 
-        bom_explosion_df = bom_explosion_df.rename(columns={'PartDescription': 'Description',
-                                                            'TypeCode': 'Type'})
-
+        bom_explosion_df = bom_explosion_df.rename(columns={'PartDescription': 'Description','TypeCode': 'Type'})
         bom_explosion_df['Dwg Link'] = ''
         bom_explosion_df = bom_explosion_df[
             ['Part', 'Description', 'Type', 'Dwg Link', 'Total Needed', 'Supply Status',
@@ -273,6 +270,12 @@ def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor):
 
         sheet.freeze_panes = 'A2'
         writer.save()
+
+        # open file once process completed
+        excel_app = Dispatch("Excel.Application")
+        excel_app.Visible = True  # otherwise excel is hidden
+        excel_wb = excel_app.Workbooks.Open(r'\\vfile\MPPublic\pdf_bom_explosion'
+                                            + '\\' + re.escape(assy_part) + f'_{file_date}.xlsx')
 
         print('Done!')
         logger.critical('---------------Done! - File Location Below---------------')
