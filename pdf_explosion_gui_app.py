@@ -153,7 +153,6 @@ class PDFAppGUI(tk.Frame):
                                                                                  ignore_epicor,
                                                                                  email_supp,
                                                                                  supp_adr))
-
         explosion_thread.start()
         explosion_thread.join()
 

@@ -34,13 +34,16 @@ epicor_data = epicor_data.rename(columns={'SumOfOurQty': 'OH_Inspect'})
 subassy_df = pd.read_excel(r'\\Vfile\d\MaterialPlanning\MPPublic\manufactured_part_routings.xlsm')
 subassy_df = subassy_df.loc[(subassy_df['ResourceGrpID'] != 'FAB')
                             & (subassy_df['ResourceGrpID'].str[0:4] != 'ELEC')
-                            & (subassy_df['ResourceGrpID'].str[0:4] != 'HOSE')]
+                            & (subassy_df['ResourceGrpID'].str[0:4] != 'HOSE')
+                            & (subassy_df['ResourceGrpID'] != 'PAINT')]
+
 subassy_df = subassy_df['MtlPartNum'].unique()
 
 
 # recursion through the BOM
 def explode_bom(top_level, make_qty, file_path, ignore_epicor):
 
+    # locals function provides list of arguments passed for a function
     explode_bom.passed_args = locals()
 
     explode_bom.part = top_level
@@ -73,7 +76,8 @@ def explode_bom(top_level, make_qty, file_path, ignore_epicor):
             df.loc[~df['PART NUMBER'].isin(subassy_df), 'sub'] = 'no'
 
             # put non phantoms in df
-            df_no_explode = df.loc[(~df['PhantomBOM']) & (df['sub'] == 'no')]
+            df_no_explode = df.loc[(df['PhantomBOM'] == 0) & (df['sub'] == 'no')]
+
             df_no_explode['# Top Level to Make'] = make_qty / explode_bom.assy_qp
             df_no_explode['Assembly'] = explode_bom.part
             df_no_explode['Assembly Q/P'] = explode_bom.assy_qp
@@ -90,7 +94,7 @@ def explode_bom(top_level, make_qty, file_path, ignore_epicor):
             sort_path_reset = explode_bom.sort_path
 
             # check for phantoms and traverse boms
-            df_explode = df.loc[(df['PhantomBOM']) | (df['sub'] == 'yes')][['PART NUMBER', 'QTY']]
+            df_explode = df.loc[(df['PhantomBOM'] == 1) | (df['sub'] == 'yes')][['PART NUMBER', 'QTY']]
 
         else:
             # do not care about epicor flags, keep exploding as long as prints have BOM's
