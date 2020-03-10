@@ -4,6 +4,7 @@
     <list default="true" id="dd931606-b969-4101-bc3c-8542ba0c3935" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pdf_explosion_gui_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdf_explosion_gui_app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pdf_explosion_gui_app.spec" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/traverse_bom.py" beforeDir="false" afterPath="$PROJECT_DIR$/traverse_bom.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -157,8 +158,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.pdf_explosion_gui_app" />
-        <item itemvalue="Python.traverse_bom" />
         <item itemvalue="Python.dummy_class" />
+        <item itemvalue="Python.traverse_bom" />
         <item itemvalue="Python.dummy_gui" />
         <item itemvalue="Python.pdf_app_withGUI_class" />
       </list>

@@ -6,6 +6,9 @@ import tkinter.scrolledtext as ScrolledText
 from log_config import log_location, log_filemode, log_format, log_datefmt
 import refresh_epicor
 
+import PIL
+from PIL import Image, ImageTk
+
 # pyinstaller to make a distribution file for users to use program
 # https://pyinstaller.readthedocs.io/en/stable/usage.html
 
@@ -50,55 +53,64 @@ class PDFAppGUI(tk.Frame):
         self.build_gui()
 
         # creates labels and text boxes
-        self.top_level_lbl = tk.Label(self.root, text='Top Level', padx=20, pady=10)
-        self.top_level_lbl.grid(column=0, row=0)
 
-        self.top_level_txtbx = tk.Entry(self.root, width=10)
-        self.top_level_txtbx.grid(column=0, row=1, padx=1, pady=1)
+        # Top Level Number
+        self.top_level_lbl = tk.Label(self.root, text='Top Level').grid(column=0, row=0, sticky='w')
+        self.top_level_txtbx = tk.Entry(self.root, width=20)
+        self.top_level_txtbx.grid(column=1, row=0, sticky='w')
 
-        self.qty_lbl = tk.Label(self.root, text='Make Qty', padx=20, pady=10)
-        self.qty_lbl.grid(column=1, row=0)
+        # Make Qty
+        self.qty_lbl = tk.Label(self.root, text='Make Qty').grid(column=0, row=1, sticky='w')
+        self.qty_txtbx = tk.Entry(self.root, width=20)
+        self.qty_txtbx.grid(column=1, row=1, sticky='w')
 
-        self.qty_txtbx = tk.Entry(self.root, width=10)
-        self.qty_txtbx.grid(column=1, row=1, padx=1, pady=10)
+        # Path to PDF's
+        self.path_lbl = tk.Label(self.root, text="Path to PDF's (if not latest)", wraplength=80)\
+            .grid(column=0, row=2, sticky='w')
+        self.path_txtbx = tk.Entry(self.root, width=25)
+        self.path_txtbx.grid(column=1, row=2, sticky='w')
 
-        self.path_lbl = tk.Label(self.root, text="Path to PDF's (if not latest)", padx=20, pady=10)
-        self.path_lbl.grid(column=2, row=0, padx=1, pady=10)
-
-        self.path_txtbx = tk.Entry(self.root, width=40)
-        self.path_txtbx.grid(column=2, row=1, padx=1, pady=10)
-
-        self.epicor_flags_lbl = tk.Label(self.root, text="Ignore Epicor Structure", padx=20, pady=10)
-        self.epicor_flags_lbl.grid(column=3, row=0, padx=1, pady=10)
-
+        # Ignore Epicor Structure
+        self.epicor_flags_lbl = tk.Label(self.root, text="Ignore Epicor Structure").grid(column=3, row=0, sticky='w')
         self.epicor_flag_value = tk.IntVar()
-        self.epicor_flags_cb = tk.Checkbutton(self.root, text="", variable=self.epicor_flag_value, padx=60, pady=1)
-        self.epicor_flags_cb.grid(column=3, row=1, sticky='w')
+        self.epicor_flags_cb = tk.Checkbutton(self.root, text="", variable=self.epicor_flag_value)
+        self.epicor_flags_cb.grid(column=4, row=0, sticky='w')
 
-        self.email_supp_lbl = tk.Label(self.root, text="Email Prints", padx=20, pady=10)
-        self.email_supp_lbl.grid(column=0, row=2, padx=1, pady=10)
+        # Email Prints
+        self.email_print_lbl = tk.Label(self.root, text="Email Prints").grid(column=3, row=1, sticky='w')
+        self.email_print_value = tk.IntVar()
+        self.email_print_cb = tk.Checkbutton(self.root, text="", variable=self.email_print_value)
+        self.email_print_cb.grid(column=4, row=1, sticky='w')
 
-        self.email_supp_value = tk.IntVar()
-        self.email_supp_cb = tk.Checkbutton(self.root, text="", variable=self.email_supp_value, padx=40, pady=1)
-        self.email_supp_cb.grid(column=0, row=3, sticky='w')
+        # Email Address
+        self.address_lbl = tk.Label(self.root, text="Email Address").grid(column=3, row=2, sticky='w')
+        self.address_txtbx = tk.Entry(self.root, width=30)
+        self.address_txtbx.grid(column=4, row=2)
 
-        self.supp_lbl = tk.Label(self.root, text="Supplier Email", padx=20, pady=10)
-        self.supp_lbl.grid(column=1, row=2, padx=1, pady=10)
-
-        self.supp_txtbx = tk.Entry(self.root, width=30)
-        self.supp_txtbx.grid(column=1, row=3, padx=1, pady=10)
-
+        # Explode Button
         self.explode_btn = tk.Button(self.root, text="Explode BOM", command=self.explode_assembly_final,
                                      padx=1, pady=1, bg='green', fg='White').grid(column=3, row=4, padx=1, pady=10)
 
+        # Refresh data
         self.refresh_btn = tk.Button(self.root, text="Refresh Data", command=refresh_epicor.refresh_data,
                                      padx=1, pady=1, bg='Orange', fg='White').grid(column=1, row=4, padx=1, pady=10)
+
+        # # PDF BOM image
+        # # use PIL to convert to format acceptable for tkinter
+        # image = PIL.Image.open('pdf_bom.PNG')
+        # converted_image = PIL.ImageTk.PhotoImage(image)
+        #
+        # # add converted image to label. must keep a reference, bug in tkinter
+        # # http://effbot.org/pyfaq/why-do-my-tkinter-images-not-appear.htm
+        # img_lbl = tk.Label(self.root, image=converted_image)
+        # img_lbl.image = converted_image
+        # img_lbl.grid(column=2, row=9, columnspan=2, rowspan=2, padx=5, pady=5)
 
     def build_gui(self):
 
         # Build GUI
         self.root.title('PDF BOM Explosion/Shortage Report')
-        self.root.geometry('800x400')
+        self.root.geometry('700x400')
         self.root.option_add('*tearOff', 'FALSE')
         self.grid(column=0, row=0, sticky='ew')
         self.grid_columnconfigure(0, weight=1, uniform='a')
@@ -108,7 +120,7 @@ class PDFAppGUI(tk.Frame):
 
         # Add text widget to display logging info
         st = ScrolledText.ScrolledText(self.root, state='disabled', width=80, height=10)
-        st.grid(column=0, row=8, sticky='w', columnspan=8, padx=15)
+        st.grid(column=0, row=8, sticky='w', columnspan=8, padx=5)
         st.configure(font='TkFixedFont')
 
         # Create textLogger
@@ -127,7 +139,7 @@ class PDFAppGUI(tk.Frame):
 
     def explode_assembly_final(self, top_level=None, qty=None,
                                path=r'\\vimage\latest' + '\\',
-                               ignore_epicor=False, email_supp=False, supp_adr=''):
+                               ignore_epicor=False, email_print=False, email_address=''):
 
         import traverse_bom
 
@@ -140,19 +152,24 @@ class PDFAppGUI(tk.Frame):
         ignore_epicor = self.epicor_flag_value.get()
         if ignore_epicor == 1:
             ignore_epicor = True
+        else:
+            ignore_epicor = False
 
         # if email supplier check, mark true and get email address
-        email_supp = self.email_supp_value.get()
-        if email_supp == 1:
-            email_supp = True
-            supp_adr = self.supp_txtbx.get()
+        email_print = self.email_print_value.get()
+        if email_print == 1:
+            email_print = True
+            email_address = self.address_txtbx.get()
+        else:
+            email_print = False
+            email_address = ''
 
         explosion_thread = threading.Thread(target=traverse_bom.explode_assembly(top_level,
                                                                                  qty,
                                                                                  path,
                                                                                  ignore_epicor,
-                                                                                 email_supp,
-                                                                                 supp_adr))
+                                                                                 email_print,
+                                                                                 email_address))
         explosion_thread.start()
         explosion_thread.join()
 

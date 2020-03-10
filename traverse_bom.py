@@ -17,7 +17,7 @@ print('---------------retrieving epicor data---------------')
 
 logger.critical('---------------retrieving epicor data---------------')
 epicor_data = pd.read_excel(r'\\vfile\MPPublic\ECN Status\ecn_data.xlsm',
-                            sheet_name='epicor_part_data')
+                            sheet_name='epicor_part_data', dtype={'PhantomBOM': np.int32})
 
 min_due = pd.read_excel(r'\\vfile\MPPublic\pdf_bom_explosion\mindue_inspOH_data.xlsm',
                         sheet_name='min_due')
@@ -28,6 +28,8 @@ inspect_oh['PartNum'] = inspect_oh['PartNum'].astype(str)
 
 # add min due date and inspection OH
 epicor_data = epicor_data.merge(min_due[['PartNum', 'First Due']], on='PartNum', how='left')
+epicor_data = epicor_data.fillna({'First Due': datetime.date(1900, 1, 1)})
+
 epicor_data = epicor_data.merge(inspect_oh[['PartNum', 'SumOfOurQty']], on='PartNum', how='left')
 epicor_data = epicor_data.rename(columns={'SumOfOurQty': 'OH_Inspect'})
 
@@ -41,7 +43,7 @@ subassy_df = subassy_df['MtlPartNum'].unique()
 
 
 # recursion through the BOM
-def explode_bom(top_level, make_qty, file_path, ignore_epicor):
+def explode_bom(top_level, make_qty, file_path, ignore_epicor, email_print):
 
     # locals function provides list of arguments passed for a function
     explode_bom.passed_args = locals()
@@ -135,7 +137,7 @@ def explode_bom(top_level, make_qty, file_path, ignore_epicor):
                 explode_bom.assy_qp = explode_qty
 
                 # recursion through lower levels
-                explode_bom(explode_part, explode_extd_qty, file_path, ignore_epicor)
+                explode_bom(explode_part, explode_extd_qty, file_path, ignore_epicor, email_print)
 
                 # reset bom level and sort path for next traversal
                 explode_bom.level -= 1
@@ -169,7 +171,7 @@ def supply_status(std, total_qty,
 
 
 # Explode Assembly
-def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor, email_supp, supp_adr):
+def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor, email_print, email_address):
 
     file_path += '\\'
 
@@ -184,7 +186,7 @@ def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor, email
 
     # perform bom recursion
     bom_explosion_df = explode_bom(top_level=top_level_input, make_qty=int(qty_input),
-                                   file_path=file_path, ignore_epicor=ignore_epicor)
+                                   file_path=file_path, ignore_epicor=ignore_epicor, email_print=email_print)
     bom_explosion_df = bom_explosion_df.rename(columns={'PART NUMBER': 'Part',
                                                         'QTY': 'Comp Q/P'})
     if not bom_explosion_df.empty:
@@ -196,7 +198,7 @@ def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor, email
             .rename(columns={'Comp Extd Qty': 'Total Needed'})
 
         bom_explosion_df = bom_explosion_df.merge(bom_expl_sum[['Part', 'Total Needed']], on='Part', how='left')
-
+        bom_explosion_df = bom_explosion_df.fillna(0)
         bom_explosion_df['Supply Status'] = bom_explosion_df.apply(lambda x:
                                                                    supply_status(x['Cost'], x['Total Needed'],
                                                                                  x['OH'], x['ONO'],
@@ -286,19 +288,19 @@ def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor, email
         logger.critical(r'\\vfile\MPPublic\pdf_bom_explosion'
                         + '\\' + re.escape(assy_part) + f'_{file_date}.xlsx')
 
-        if email_supp:
+        if email_print:
 
             outlook = win32com.client.DispatchEx('outlook.application')
             mail = outlook.CreateItem(0)
-            mail.To = supp_adr
-            mail.CC = 'jboyette@leeboy.com'
-            mail.Subject = f'Please quote {top_level_input}'
+            mail.To = email_address
+            mail.Subject = f'LeeBoy Request for Quote - {top_level_input}'
             mail.Body = ''
             mail.HTMLBody = f"""
                     <body>
-                        <p>attched component prints</p>
+                        <p>Attached component prints</p>
                     </body>"""
 
+            part_list.append(assy_part)
             for part in part_list:
                 try:
                     base_url = r'\\vimage\latest' + '\\'
