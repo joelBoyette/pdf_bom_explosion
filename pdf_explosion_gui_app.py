@@ -92,9 +92,9 @@ class PDFAppGUI(tk.Frame):
         self.explode_btn = tk.Button(self.root, text="Explode BOM", command=self.explode_assembly_final,
                                      bg='green', fg='White').grid(column=3, row=4, padx=1, pady=5, sticky='w')
 
-        # # Refresh data
-        # self.refresh_btn = tk.Button(self.root, text="Refresh Data", command=refresh_epicor.refresh_data,
-        #                              padx=1, pady=1, bg='Orange', fg='White').grid(column=1, row=4, padx=1, pady=10)
+        # Refresh data
+        self.refresh_btn = tk.Button(self.root, text="Refresh Data", command=refresh_epicor.refresh_data,
+                                     padx=1, pady=1, bg='Orange', fg='White').grid(column=1, row=4, padx=1, pady=10)
 
         self.log_lbl = tk.Label(self.root, text='Log Results').grid(column=0, row=5, padx=5, sticky='w')
 
