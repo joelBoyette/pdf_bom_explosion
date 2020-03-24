@@ -8,7 +8,7 @@ import refresh_epicor
 
 # pyinstaller to make a distribution file for users to use program
 # https://pyinstaller.readthedocs.io/en/stable/usage.html
-# pyinstaller --hidden-import pkg_resources.py2_warn example.py
+# pyinstaller --hidden-import pkg_resources.py2_warn pdf_explosion_gui_app.py
 # https://stackoverflow.com/questions/37815371/pyinstaller-failed-to-execute-script-pyi-rth-pkgres-and-missing-packages
 
 # https://www.ghostscript.com/download/gsdnld.html

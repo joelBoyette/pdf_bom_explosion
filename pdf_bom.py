@@ -9,6 +9,7 @@ warnings.filterwarnings("ignore")
 
 logger = logging.getLogger(__name__)
 
+
 # #################### TABULA PY  ############################
 # https://tabula-py.readthedocs.io/en/latest/getting_started.html#example
 def clean_pdf_tabulapy(part, file_path):
@@ -199,11 +200,12 @@ def clean_pdf_camelot_scale15(part, file_path):
     full_path = file_path + f'{part}.pdf'
 
     try:
+        # pdf_df = camelot.read_pdf(full_path, line_scale=15, shift_text=[''])[0].df
         pdf_df = camelot.read_pdf(full_path, line_scale=15, shift_text=[''])[0].df
     except:
         # if user supplied path doesnt work
         default_path = r'\\vimage\latest' + '\\' + f'{part}.pdf'
-        pdf_df = camelot.read_pdf(default_path, line_scale=15, shift_text=[''])[0].df
+        pdf_df = camelot.read_pdf(default_path, line_scale=15)[0].df
 
     pdf_df = pdf_df.replace('\\n', '', regex=True)
     find_column_dict = {}
@@ -227,8 +229,9 @@ def clean_pdf_camelot_scale15(part, file_path):
 
     col_index = pdf_df.columns.get_loc(find_column_dict['column'])
     df_final = pdf_df.iloc[:, col_index:col_index + 6]
-    df_final = df_final.dropna(how='all')
-    df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
+
+    # df_final = df_final.dropna(how='all')
+    # df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
 
     if clean_type == 'PART NUMBER':
         header_index = df_final[df_final.iloc[:, 0] == 'PART NUMBER'].index[0]
@@ -245,13 +248,15 @@ def clean_pdf_camelot_scale15(part, file_path):
     headers = [str(header).replace('QTY.', 'QTY') for header in headers]
     df_final.columns = headers  # #makes columns match the headers list
     df_final = df_final.iloc[header_index + 1:]  # remove rows that contained the headers
-    df_final = df_final.rename(columns={df_final.columns[0]: 'PART NUMBER'})
+    df_final = df_final.rename(columns={df_final.columns[0]: 'PART NUMBER'}).reset_index(drop=True)
+
+    if df_final['PART NUMBER'][0] == '':
+        raise Exception
 
     df_final = df_final.loc[df_final['PART NUMBER'].str.contains(
         '(\d+[A-Z] )|([A-Z]+\d)[\dA-Z]*|[0-9] [0-9]|\d\d+|\d[.]-', regex=True)]
 
-    df_final = df_final.loc[~df_final['PART NUMBER'].str.contains(
-        '(^[.])|([\/])', regex=True)]
+    df_final = df_final.loc[~df_final['PART NUMBER'].str.contains('(^[.])|([\/])', regex=True)]
 
     df_final = df_final.loc[~df_final['PART NUMBER'].str.contains(' ', regex=True)]
     if 'QTY' not in df_final.columns:
@@ -298,8 +303,8 @@ def clean_pdf_camelot_scale10(part, file_path):
 
     col_index = pdf_df.columns.get_loc(find_column_dict['column'])
     df_final = pdf_df.iloc[:, col_index:col_index + 6]
-    df_final = df_final.dropna(how='all')
-    df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
+    # df_final = df_final.dropna(how='all')
+    # df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
 
     if clean_type == 'PART NUMBER':
         header_index = df_final[df_final.iloc[:, 0] == 'PART NUMBER'].index[0]
@@ -319,10 +324,14 @@ def clean_pdf_camelot_scale10(part, file_path):
     df_final = df_final.iloc[header_index + 1:]  # remove rows that contained the headers
     df_final = df_final.rename(columns={df_final.columns[0]: 'PART NUMBER'})
 
+    if df_final['PART NUMBER'][0] == '':
+        raise Exception
+
     df_final = df_final.loc[df_final['PART NUMBER'].str.contains(
         '(\d+[A-Z] )|([A-Z]+\d)[\dA-Z]*|[0-9] [0-9]|\d\d+|\d[.]-', regex=True)]
 
     df_final = df_final.loc[~df_final['PART NUMBER'].str.contains(' ', regex=True)]
+
     if 'QTY' not in df_final.columns:
         df_final = df_final.replace(' ', np.nan)
         df_final = df_final.dropna(axis=1, how='all')
@@ -367,8 +376,8 @@ def clean_pdf_camelot_scale5(part, file_path):
     clean_type = find_column_dict['clean type']
     col_index = pdf_df.columns.get_loc(find_column_dict['column'])
     df_final = pdf_df.iloc[:, col_index:col_index + 6]
-    df_final = df_final.dropna(how='all')
-    df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
+    # df_final = df_final.dropna(how='all')
+    # df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
 
     if clean_type == 'PART NUMBER':
         header_index = df_final[df_final.iloc[:, 0] == 'PART NUMBER'].index[0]
@@ -387,10 +396,14 @@ def clean_pdf_camelot_scale5(part, file_path):
     df_final = df_final.iloc[header_index + 1:]  # remove rows that contained the headers
     df_final = df_final.rename(columns={df_final.columns[0]: 'PART NUMBER'})
 
+    if df_final['PART NUMBER'][0] == '':
+        raise Exception
+
     df_final = df_final.loc[df_final['PART NUMBER'].str.contains(
         '(\d+[A-Z] )|([A-Z]+\d)[\dA-Z]*|[0-9] [0-9]|\d\d+|\d[.]-', regex=True)]
 
     df_final = df_final.loc[~df_final['PART NUMBER'].str.contains(' ', regex=True)]
+
     if 'QTY' not in df_final.columns:
         df_final = df_final.replace(' ', np.nan)
         df_final = df_final.dropna(axis=1, how='all')
@@ -534,7 +547,7 @@ def clean_pdf_camelot_scale20(part, file_path):
         df_final = df_final.iloc[:, 0:2]
         df_final.columns = ['PART NUMBER', 'QTY']
     df_final = df_final[['PART NUMBER', 'QTY']]
-    df_final['FUNCTION'] = 'camelot_scale5'
+    df_final['FUNCTION'] = 'camelot_scale20'
 
     return df_final
 
@@ -884,102 +897,38 @@ def clean_pdf_camelot_scale3(part, file_path):
     return df_final
 
 
-def read_pdf_bom(part, file_path):
+def read_pdf_bom(part, file_path=r'\\vimage\latest' + '\\'):
+
     pdf_bom_all_df = pd.DataFrame()
-    try:
-        pdf_bom_df = clean_pdf_camelot_scale15(part, file_path)
-        any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-        alpha_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
-        if pdf_bom_df.empty or not any_blanks or alpha_qty > 0:
-            raise Exception
-    except:
+
+    for pdf_func in [clean_pdf_tabulapy, clean_pdf_camelot_scale15, clean_pdf_camelot_scale5,
+                     clean_pdf_camelot_scale10, clean_pdf_camelot_stream, clean_pdf_camelot_scale20,
+                     clean_pdf_camelot_scale15_split_text, clean_pdf_camelot_scale10_split_text,
+                     clean_pdf_camelot_scale5_split_text, clean_pdf_camelot_scale20_split_text,
+                     clean_pdf_camelot_scale3
+                     ]:
         try:
-            pdf_bom_df = clean_pdf_tabulapy(part, file_path)
+
+            pdf_bom_df = pdf_func(part, file_path)
             any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
             alpha_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
-            blank_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-            if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                raise Exception
-        except:
-            try:
-                pdf_bom_df = clean_pdf_camelot_scale10(part, file_path)
-                any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-                alpha_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
-                blank_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-                if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                    raise Exception
-            except:
-                try:
-                    pdf_bom_df = clean_pdf_camelot_scale5(part, file_path)
-                    any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-                    blank_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-                    if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                        raise Exception
-                except:
-                    try:
-                        pdf_bom_df = clean_pdf_camelot_stream(part, file_path)
-                        any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-                        blank_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-                        if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                            raise Exception
-                    except:
-                        try:
-                            pdf_bom_df = clean_pdf_camelot_scale20(part, file_path)
-                            any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-                            alpha_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
-                            blank_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-                            if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                                raise Exception
-                        except:
-                            try:
-                                pdf_bom_df = clean_pdf_camelot_scale15_split_text(part, file_path)
-                                any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-                                alpha_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
-                                blank_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-                                if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                                    raise Exception
-                            except:
-                                try:
-                                    pdf_bom_df = clean_pdf_camelot_scale10_split_text(part, file_path)
-                                    any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-                                    alpha_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
-                                    blank_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-                                    if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                                        raise Exception
-                                except:
-                                    try:
-                                        pdf_bom_df = clean_pdf_camelot_scale5_split_text(part, file_path)
-                                        any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-                                        alpha_qty = \
-                                        pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
-                                        blank_qty = pdf_bom_df.loc[
-                                            pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-                                        if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                                            raise Exception
-                                    except:
-                                        try:
-                                            pdf_bom_df = clean_pdf_camelot_scale20_split_text(part, file_path)
-                                            any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-                                            alpha_qty = pdf_bom_df.loc[
-                                                pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
-                                            blank_qty = pdf_bom_df.loc[
-                                                pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-                                            if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                                                raise Exception
-                                        except:
-                                            try:
-                                                pdf_bom_df = clean_pdf_camelot_scale3(part, file_path)
-                                                any_blanks = pdf_bom_df.loc[:, (pdf_bom_df == '').all()].count().empty
-                                                alpha_qty = pdf_bom_df.loc[pdf_bom_df['QTY'].str.contains('[A-Z]', regex=True)].count()['QTY']
-                                                blank_qty = pdf_bom_df[:-1].loc[pdf_bom_df['QTY'].str.contains(r'^\s*$', regex=True)].count()['QTY']
-                                                if pdf_bom_df.empty or not any_blanks or alpha_qty > 0 or blank_qty > 0:
-                                                    raise Exception
-                                            except Exception as e:
 
-                                                logger.critical(e)
-                                                print(f' no methods worked for {part}')
-                                                pdf_bom_df = pd.DataFrame(
-                                                    columns=['PART NUMBER', 'QTY', 'FUNCTION'])
+            if pdf_bom_df.empty:
+                raise Exception
+            elif not any_blanks:
+                raise Exception
+            elif alpha_qty > 0:
+                raise Exception
+
+        except Exception as e:
+
+            # print(f' no methods worked for {part}')
+            pdf_bom_df = pd.DataFrame(
+                columns=['PART NUMBER', 'QTY', 'FUNCTION'])
+        else:
+            break
+
+    pdf_bom_df['Assembly'] = part
 
     # appends current ecn df to the overall df
     pdf_bom_all_df = pdf_bom_all_df.append(pdf_bom_df, sort=False)
@@ -994,8 +943,3 @@ def read_pdf_bom(part, file_path):
         r'^\s*$', regex=True)]
 
     return pdf_bom_all_df
-
-
-# df = clean_pdf_tabulapy('1020322', r'\\vimage\latest'+'\\')
-#
-# print(df)
