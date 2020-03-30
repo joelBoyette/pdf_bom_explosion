@@ -230,8 +230,11 @@ def clean_pdf_camelot_scale15(part, file_path):
     col_index = pdf_df.columns.get_loc(find_column_dict['column'])
     df_final = pdf_df.iloc[:, col_index:col_index + 6]
 
-    # df_final = df_final.dropna(how='all')
-    # df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
+    if df_final.iloc[4, 0] != '':
+        df_final = df_final.dropna(how='all')
+        df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
+    else:
+        raise Exception
 
     if clean_type == 'PART NUMBER':
         header_index = df_final[df_final.iloc[:, 0] == 'PART NUMBER'].index[0]
@@ -303,8 +306,12 @@ def clean_pdf_camelot_scale10(part, file_path):
 
     col_index = pdf_df.columns.get_loc(find_column_dict['column'])
     df_final = pdf_df.iloc[:, col_index:col_index + 6]
-    # df_final = df_final.dropna(how='all')
-    # df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
+
+    if df_final.iloc[4, 0] != '':
+        df_final = df_final.dropna(how='all')
+        df_final = df_final[df_final.iloc[:, 0] != ''].reset_index(drop=True)
+    else:
+        raise Exception
 
     if clean_type == 'PART NUMBER':
         header_index = df_final[df_final.iloc[:, 0] == 'PART NUMBER'].index[0]
@@ -943,3 +950,5 @@ def read_pdf_bom(part, file_path=r'\\vimage\latest' + '\\'):
         r'^\s*$', regex=True)]
 
     return pdf_bom_all_df
+
+
