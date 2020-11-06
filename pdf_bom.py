@@ -931,8 +931,8 @@ def read_pdf_bom(part, file_path=r'\\vimage\latest' + '\\'):
 
     pdf_bom_all_df = pd.DataFrame()
 
-    for pdf_func in [clean_pdf_tabulapy, clean_pdf_camelot_scale15, clean_pdf_camelot_scale10, clean_pdf_camelot_scale5,
-                     clean_pdf_camelot_stream, clean_pdf_camelot_scale20,
+    for pdf_func in [clean_pdf_tabulapy, clean_pdf_camelot_scale15, clean_pdf_camelot_scale10,
+                     clean_pdf_camelot_scale5, clean_pdf_camelot_stream, clean_pdf_camelot_scale20,
                      clean_pdf_camelot_scale15_split_text, clean_pdf_camelot_scale10_split_text,
                      clean_pdf_camelot_scale5_split_text, clean_pdf_camelot_scale20_split_text,
                      clean_pdf_camelot_scale3

@@ -177,6 +177,7 @@ def explode_assembly(top_level_input, qty_input, file_path, ignore_epicor, email
 
     print('---------------exploding assembly---------------')
     logger.critical('---------------exploding assembly---------------')
+
     # setup recursion variables
     explode_bom.df_final = pd.DataFrame()
     explode_bom.level = 0
